@@ -18,7 +18,9 @@ The user journey will be as follows:
 - Node.js (Server Runtime): The runtime environment for the backend.
 - Python (AI Backend): A dedicated microservice written in Python, using a framework like TensorFlow or PyTorch, will host the trained AI model. This service will receive data from the Express.js API, run the prediction, and return the recommendation.
 ## Team Roles: 
-
+Frontend: Aditi, Ira, Sreyasri
+Backend: Vaishnavi, Ira
+AI/ML: Vaishnavi
 ## Step Plan:
 	Week 1. 
 	Week 2.  
