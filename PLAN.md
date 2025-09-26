@@ -22,23 +22,31 @@ The user journey will be as follows:
 - Backend: Vaishnavi, Ira
 - AI/ML: Vaishnavi
 ## Step Plan:
-- Week 1-2:
-  - Frontend: Figma design, planning questions, building out the pages
-  - Backend: User login/signup and authentication
+Week 1-2:
+- Frontend: Figma design, planning questions, building out the pages
+- Backend: User login/signup and authentication
+- AI: Start looking at data and creating the input and output schemas
 
-- Week 3-5:
-  - Core functionality
-  - Survey pages
-  - AI recommendation
+Week 3-5:
+- Frontend: Continue on Figma design, try to finalize the core functionality pages
+- Backend: Ensure login signup routes are working and connected to the database, work on onboarding and survey endpoints
+- AI: Start work on creating the model, start with 1 hidden layer
 
-- Week 6:
-  - Mid semester check in
-  - Try and have a demo able to present
+Week 6:
+- Mid semester check in
+- Demo to present ideally
+- Login/signup
+- Onboarding process
+- Calendar page with “test data”
+- Able to fill out surveys and get a response of some kind from the model
 
-- Week 7-9:
-  - Pharmacy lookup and pricing
-  - Refinement and bug fixing
+Week 7-9:
+- Frontend: Continue iterating on pages and design
+- Backend: Pharmacy lookup and pricing endpoints
+- AI/ML: Get the model to be able to predict medicine and dosage amounts
+- Refinement and bug fixing
 
-- Week 10-11:
-  - Presentations and mock practices
+Week 10-11:
+- Presentations and mock practices
+
 
