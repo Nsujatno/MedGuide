@@ -9,10 +9,10 @@ const surveySchema = new mongoose.Schema({
     medications: { type: [String], required: true },
     pain: { type: [String], required: true },
     nausea: { type: Boolean, required: true },
-    symptomstart: { type: Date, required: true },
-    bodypart: { type: [String], required: true },
-    budget: { type: Number, required: true },
-    fever: { type: Boolean, required: true }
+    symptomstart: { type: Date, required: false },
+    bodypart: { type: [String], required: false },
+    budget: { type: Number, required: false },
+    fever: { type: Boolean, required: false }
 
 });
 
@@ -53,5 +53,28 @@ router.post('/create', async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 })
+
+router.get('/', async (req, res) => {
+    try {
+        const surveys = await Survey.find();
+        res.status(200).json(surveys);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+router.get('/:id', async (req, res) => {
+    try {
+        const survey = await Survey.findById(req.params.id);
+        if (!survey) {
+            return res.status(404).json({ message: 'Survey not found' });
+        }
+        res.status(200).json(survey);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
 
 module.exports = router;
