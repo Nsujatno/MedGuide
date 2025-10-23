@@ -1,9 +1,11 @@
 import { Text, View, Image, Pressable } from "react-native";
 import { useFonts, JosefinSans_400Regular } from "@expo-google-fonts/josefin-sans";
-import { Link } from 'expo-router';
+import {useRouter} from "expo-router"; 
+
 
 
 export default function Index() {
+  const router = useRouter(); 
   const [fontsLoaded] = useFonts({
     JosefinSans_400Regular,
   });
@@ -22,7 +24,7 @@ export default function Index() {
         paddingTop: 80,
       }}
     >
-      {/* Title */}
+     
       <Text
         style={{
           fontFamily: "JosefinSans_400Regular",
@@ -35,7 +37,7 @@ export default function Index() {
         Welcome To{"\n"}MedGuide
       </Text>
 
-      {/* Tagline */}
+    
       <Text
         style={{
           fontFamily: "JosefinSans_400Regular",
@@ -43,24 +45,25 @@ export default function Index() {
           color: "#FFFFFF",
           textAlign: "center",
           marginTop: 10,
+          marginBottom: 250,
         }}
       >
         Your Smart Guide
       </Text>
 
-      {/* Image */}
+     
       <Image
-        source={require("/Users/aditikammaradi/Desktop/MedGApp/MedGuide/frontend/assets/Screenshot 2025-10-10 at 1.59.16 AM.png")}
+        source={require("/Users/aditikammaradi/Desktop/MedGApp/MedGuide/frontend/assets/Screenshot 2025-10-23 at 6.31.10 PM.png")}
         style={{
-          width: 180,
-          height: 180,
-          resizeMode: "contain",
-          marginTop: 30,
-          marginBottom: 30,
+          position: "absolute", // 👈 just like your CSS
+          width: 223,
+          height: 223,
+          top: 220, // adjust this to position it
+          left: 100, // optional — use if needed
         }}
       />
 
-      {/* Description */}
+      
       <Text
         style={{
           fontFamily: "JosefinSans_400Regular",
@@ -70,43 +73,22 @@ export default function Index() {
           lineHeight: 20,
           maxWidth: 300,
           marginHorizontal: "auto",
-          marginBottom: 40,
+          marginBottom: 30,
         }}
       >
         Explore our custom-trained AI model employing data-driven recommendations
         for over-the-counter medication.
       </Text>
 
-      {/* Button */}
+    
       <Pressable
-        onPress={() => alert("Button pressed!")}
+        onPress={() => router.push('/login')} 
         style={{
-          backgroundColor: "#8B0000", // dark red
-          paddingVertical: 12,
-          paddingHorizontal: 40,
-          borderRadius: 25,
-          marginTop: 0,
-        }}
-      >
-        <Text
-          style={{
-            color: "white",
-            fontSize: 18,
-            fontFamily: "JosefinSans_400Regular",
-            textAlign: "center",
-          }}
-        >
-          Create an Account
-        </Text>
-      </Pressable>
-      <Pressable
-        onPress={() => alert("Button pressed!")}
-        style={{
-          backgroundColor: "#b15454ff", 
+          backgroundColor: "#8B0000", 
           paddingVertical: 12,
           paddingHorizontal: 90,
           borderRadius: 25,
-          marginTop: 20,
+          marginTop: 0,
         }}
       >
         <Text
@@ -120,7 +102,27 @@ export default function Index() {
           Log In
         </Text>
       </Pressable>
-      
+      <Pressable
+        onPress={() => router.push('/signUp')} 
+        style={{
+          backgroundColor: "#b15454ff", 
+          paddingVertical: 12,
+          paddingHorizontal: 40,
+          borderRadius: 25,
+          marginTop: 20,
+        }}
+      >
+        <Text
+          style={{
+            color: "white",
+            fontSize: 18,
+            fontFamily: "JosefinSans_400Regular",
+            textAlign: "center",
+          }}
+        >
+          Create an Account
+        </Text>
+      </Pressable>
     </View>
   );
 }
