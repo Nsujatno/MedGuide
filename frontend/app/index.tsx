@@ -55,11 +55,11 @@ export default function Index() {
       <Image
         source={require("/Users/aditikammaradi/Desktop/MedGApp/MedGuide/frontend/assets/Screenshot 2025-10-23 at 6.31.10 PM.png")}
         style={{
-          position: "absolute", // 👈 just like your CSS
+          position: "absolute", 
           width: 223,
           height: 223,
-          top: 220, // adjust this to position it
-          left: 100, // optional — use if needed
+          top: 220, 
+          left: 100, 
         }}
       />
 
