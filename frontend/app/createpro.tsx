@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import { Text, View, Image, Pressable } from "react-native";
 import {useLocalSearchParams, useRouter} from "expo-router"; 
 import { useFonts, DidactGothic_400Regular } from "@expo-google-fonts/didact-gothic";
-export default function Created() {
+export default function CreatePro() {
     const router = useRouter(); 
     const {firstNameLetter} = useLocalSearchParams(); 
     const [showMenu, setShowMenu] = useState(false); 
