@@ -7,10 +7,6 @@ require('dotenv').config();
 
 app.use(express.json());
 
-const express = require("express");
-const mongoose = require("mongoose");
-const dotenv = require("dotenv");
-
 // use your routes under a base path
 // app.use("/api", postRoutes);
 
@@ -44,8 +40,4 @@ app.use('/api/survey', surveyRouter);
 // //default route
 app.get('/', (req, res) => {
     res.send('Hello, World!');
-});
-
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
 });

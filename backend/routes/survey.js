@@ -9,10 +9,10 @@ const surveySchema = new mongoose.Schema({
     medications: { type: [String], required: true },
     pain: { type: [String], required: true },
     nausea: { type: Boolean, required: true },
-    symptomstart: { type: Date, required: false },
-    bodypart: { type: [String], required: false },
-    budget: { type: Number, required: false },
-    fever: { type: Boolean, required: false }
+    symptomstart: { type: Date, required: true },
+    bodypart: { type: [String], required: true },
+    budget: { type: Number, required: true },
+    fever: { type: Boolean, required: true }
 
 });
 
