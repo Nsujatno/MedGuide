@@ -31,7 +31,7 @@ export default function Calendar() {
         textAlign: "center",
         paddingHorizontal: 20
       }}>
-        View Your Personalized Schedule Here
+        View your personalized calendar here
       </Text>
     </View>
   );
