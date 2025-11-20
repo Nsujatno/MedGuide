@@ -21,7 +21,7 @@ export default function Finder() {
         fontFamily: "DidactGothic_400Regular",
         color: "#67130f"
       }}>
-        Healthcare Finder
+        Pharmacy Finder
       </Text>
       <Text style={{
         fontSize: 16,
@@ -31,7 +31,7 @@ export default function Finder() {
         textAlign: "center",
         paddingHorizontal: 20
       }}>
-        Find healthcare providers and facilities near you.
+        Find Pharmacies Near You
       </Text>
     </View>
   );
