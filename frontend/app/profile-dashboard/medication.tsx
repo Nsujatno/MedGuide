@@ -21,7 +21,7 @@ export default function Medication() {
         fontFamily: "DidactGothic_400Regular",
         color: "#67130f"
       }}>
-        Medication Tracker
+        My Medication Plan
       </Text>
       <Text style={{
         fontSize: 16,
@@ -31,7 +31,7 @@ export default function Medication() {
         textAlign: "center",
         paddingHorizontal: 20
       }}>
-        Track your medications and dosages here.
+        View Your Recommended Plan Here
       </Text>
     </View>
   );
