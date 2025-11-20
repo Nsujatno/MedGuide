@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import { Text, View, Image, Pressable } from "react-native";
 import {useLocalSearchParams, useRouter} from "expo-router"; 
 import { useFonts, DidactGothic_400Regular } from "@expo-google-fonts/didact-gothic";
-export default function Profile() {
+export default function Profie() {
     const router = useRouter(); 
     const {firstNameLetter} = useLocalSearchParams(); 
     const [showMenu, setShowMenu] = useState(false); 
@@ -58,7 +58,10 @@ export default function Profile() {
             <Pressable 
             onPress={() => {
                 setShowMenu(false); 
-                router.push("/createpro"); 
+                router.push({
+                  pathname: "/createpro",
+                  params: { firstNameLetter }
+                }); 
 
             }}
             style = {{ padding: 10}}
@@ -140,9 +143,39 @@ export default function Profile() {
 
       
       <Pressable
-        onPress={() => router.push('/createpro')} 
+        onPress={() => router.push({
+          pathname: '/createpro',
+          params: { firstNameLetter }
+        })} 
         style={{
           backgroundColor: "#d16868ff", 
+          paddingVertical: 5,
+          paddingHorizontal: 90,
+          borderRadius: 25,
+          shadowColor: "darkred",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 1,
+          shadowRadius: 6,
+          marginBottom: 10,
+          marginTop: 0,
+        }}
+      >
+        <Text
+          style={{
+            color: "black",
+            fontSize: 18,
+            fontFamily: "DidactGothic_400Regular",
+            textAlign: "center",
+          }}
+        >
+          Set up Profile
+        </Text>
+      </Pressable>
+
+      <Pressable
+        onPress={() => router.push('/profile-dashboard/home')} 
+        style={{
+          backgroundColor: "#bc7272ff", 
           paddingVertical: 5,
           paddingHorizontal: 90,
           borderRadius: 25,
@@ -156,13 +189,13 @@ export default function Profile() {
       >
         <Text
           style={{
-            color: "black",
+            color: "white",
             fontSize: 18,
             fontFamily: "DidactGothic_400Regular",
             textAlign: "center",
           }}
         >
-          Set up Profile
+          Go to Dashboard
         </Text>
       </Pressable>
 
