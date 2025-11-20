@@ -157,108 +157,193 @@ export default function Home() {
                             </Pressable>
                             </View>
                             )}
-            <Image
-                source={require("../../assets/images/medicine.png")}
-                style={{
-                    position: "absolute", 
-                    width: 200,
-                    height: 200,
-                    top: 130,
-                    left: 110, 
-                    marginBottom: 20,
-                    marginTop: 150,
-                }}
-            />
+                            <Text
+                                style={{
+                                    fontFamily: "DidactGothic_400Regular",
+                                    color: "darkred",
+                                    fontSize: 30,
+                                    textAlign: "center",
+                                    marginTop: 30,
+                                
+
+                                }}
+                            >
+                                Explore Our Features
+                            </Text>
+            
       
-            <View
-                style={{
-                    
-                    marginBottom: 50,
-                    marginTop: 10,
-                    
-                }}
-            >
-                <Text
-                    style={{
-                        color: "darkred",
-                        fontFamily: "DidactGothic_400Regular",
-                        fontSize: 30,
-                        fontWeight: "900",
-                    }}
-                >
-                     Explore our Features
-                </Text>
-            </View>
-            <Pressable
-        onPress={() => router.push('/survey')} 
+            {/* --- 1. SYMPTOM SURVEY (above image) --- */}
+<Pressable
+    onPress={() => router.push('/survey')}
+    style={{
+        backgroundColor: "#b15454ff",
+        paddingVertical: 20,
+        paddingHorizontal: 10,
+        borderRadius: 25,
+        marginTop: 30,
+        width: 250,
+        marginBottom: 20,
+    }}
+>
+    <Text
         style={{
-          backgroundColor: "#b15454ff", 
-          paddingVertical: 20,
-          paddingHorizontal: 10,
-          borderRadius: 25,
-          marginTop: 20,
-          marginBottom: 270,
-          
-        }}
-      >
-        <Text
-          style={{
             color: "white",
             fontSize: 18,
             fontFamily: "JosefinSans_400Regular",
             textAlign: "center",
-          }}
-        >
-          Take Symptom Survey
-        </Text>
-      </Pressable>
-      <Pressable
-        onPress={() => router.push("/profile-dashboard/medication")} 
-        style={{
-          backgroundColor: "#b15454ff", 
-          paddingVertical: 20,
-          paddingHorizontal: 10,
-          borderRadius: 25,
-          marginTop: 20,
-          
         }}
-      >
-        <Text
-          style={{
-            color: "white",
-            fontSize: 18,
-            fontFamily: "JosefinSans_400Regular",
-            textAlign: "center",
-          }}
-        >
-          View Medication Plan
-        </Text>
-      </Pressable>
-      <Pressable
-        onPress={() => router.push("/profile-dashboard/calendar")} 
-        style={{
-          backgroundColor: "#b15454ff", 
-          paddingVertical: 20,
-          paddingHorizontal: 10,
-          borderRadius: 25,
-          marginTop: 20,
-          
-        }}
-      >
-        <Text
-          style={{
-            color: "white",
-            fontSize: 18,
-            fontFamily: "JosefinSans_400Regular",
-            textAlign: "center",
-          }}
-        >
-          My Calendar
-        </Text>
-      </Pressable>
+    >
+        Take Symptom Survey
+    </Text>
+</Pressable>
 
 
-        </View>
+{/* --- 2. IMAGE WITH CALENDAR BUTTON IN TOP-LEFT --- */}
+<View style={{ marginTop: 30 }}>
+    
+    {/* Calendar positioned on top-left of image */}
+    <Pressable
+        onPress={() => router.push("/profile-dashboard/calendar")}
+        style={{
+            position: "absolute",
+            top: -10,
+            left: -70,
+            backgroundColor: "#67130f",
+            width: 90,
+            height: 90,
+            borderRadius: 20,
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 10,
+            
+        }}
+    >
+        <Text style={{
+            color: "white",
+            fontSize: 16,
+            fontFamily: "JosefinSans_400Regular",
+            textAlign: "center",
+        }}>
+            My{"\n"}Calendar
+        </Text>
+    </Pressable>
+     <Pressable
+        onPress={() => router.push("/createpro")}
+        style={{
+            position: "absolute",
+            top: -10,
+            //left: -50,
+            right: -75,
+            backgroundColor: "#67130f",
+            width: 90,
+            height: 90,
+            borderRadius: 20,
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 10,
+            
+        }}
+    >
+        <Text style={{
+            color: "white",
+            fontSize: 16,
+            fontFamily: "JosefinSans_400Regular",
+            textAlign: "center",
+        }}>
+            Edit{"\n"}Profile
+        </Text>
+    </Pressable>
+
+    {/* IMAGE */}
+    <Image
+        source={require("../../assets/images/medicine.png")}
+        style={{
+            width: 220,
+            height: 220,
+            alignSelf: "center",
+            left: -10,
+            
+        }}
+    />
+</View>
+<Pressable
+        onPress={() => router.push("/profile-dashboard/finder")}
+        style={{
+            position: "absolute",
+            top: 375,
+            left: 30,
+            backgroundColor: "white",
+            width: 90,
+            height: 90,
+            borderRadius: 20,
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 10,
+            
+        }}
+    >
+        <Text style={{
+            color: "darkred",
+            fontSize: 16,
+            fontFamily: "JosefinSans_400Regular",
+            textAlign: "center",
+        }}>
+            Pharmacy{"\n"}Finder
+        </Text>
+    </Pressable>
+    <Pressable
+        onPress={() => router.push("/followup")}
+        style={{
+            position: "absolute",
+            top: 375,
+            //left: -50,
+            right: 20,
+            backgroundColor: "white",
+            width: 90,
+            height: 90,
+            borderRadius: 20,
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 10,
+            
+        }}
+    >
+        <Text style={{
+            color: "darkred",
+            fontSize: 16,
+            fontFamily: "JosefinSans_400Regular",
+            textAlign: "center",
+        }}>
+            Follow-up{"\n"}Survey
+        </Text>
+    </Pressable>
+
+
+{/* --- 3. VIEW MEDICATION PLAN (below image) --- */}
+<Pressable
+    onPress={() => router.push("/profile-dashboard/medication")}
+    style={{
+        backgroundColor: "#b15454ff",
+        paddingVertical: 20,
+        paddingHorizontal: 10,
+        borderRadius: 25,
+        marginTop: 30,
+        width: 250,
+    }}
+>
+    <Text
+        style={{
+            color: "white",
+            fontSize: 18,
+            fontFamily: "JosefinSans_400Regular",
+            textAlign: "center",
+        }}
+    >
+        View Medication Plan
+    </Text>
+</Pressable>
+ 
+</View>
     );
 
 }
