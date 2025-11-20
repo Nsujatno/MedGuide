@@ -172,32 +172,7 @@ export default function Profie() {
         </Text>
       </Pressable>
 
-      <Pressable
-        onPress={() => router.push('/profile-dashboard/home')} 
-        style={{
-          backgroundColor: "#bc7272ff", 
-          paddingVertical: 5,
-          paddingHorizontal: 90,
-          borderRadius: 25,
-          shadowColor: "darkred",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 1,
-          shadowRadius: 6,
-          marginBottom: 20,
-          marginTop: 0,
-        }}
-      >
-        <Text
-          style={{
-            color: "white",
-            fontSize: 18,
-            fontFamily: "DidactGothic_400Regular",
-            textAlign: "center",
-          }}
-        >
-          Go to Dashboard
-        </Text>
-      </Pressable>
+     
 
       </View>
    
