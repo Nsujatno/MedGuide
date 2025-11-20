@@ -49,33 +49,26 @@ export default function SignUp() {
       }}
     >
     <View
-        style={{
-          backgroundColor: "#f0a7a3ff",
-          paddingVertical: 10,
-          paddingHorizontal: 60,
-          borderRadius: 15,
-          borderWidth: 0.5,
-          borderColor: "white",
-          marginBottom: 20,
-          shadowColor: "#a92121ff",        
-          shadowOffset: { width: 4, height: 10 }, 
-          shadowOpacity: 0.2,         
-          shadowRadius: 4,           
+            style={{
+             
+              marginBottom: 20,
+              
+              
+              elevation: 5, 
+            }}
+          >
+            <Text
+              style={{
+                color: "#530c0cff",
+                fontFamily: "DidactGothic_400Regular",
     
-          elevation: 5, 
-        }}
-      >
-        <Text
-          style={{
-            color: "black",
-            fontFamily: "DidactGothic_400Regular",
-
-            fontSize: 18,
-          }}
-        >
-          Create an Account
-        </Text>
-    </View>
+                fontSize: 40,
+                fontWeight: "900",
+              }}
+            >
+              Create an Account
+            </Text>
+        </View>
     <View
         style={{
           backgroundColor: "#c86e6eff", 
@@ -385,4 +378,5 @@ export default function SignUp() {
     
   );
 }
+
 
