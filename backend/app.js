@@ -32,11 +32,13 @@ mongoose
 const onboardingRouter = require('./routes/onboarding');
 const surveyRouter = require('./routes/survey');
 const userRouter = require('./routes/user');
+const pharmacyRouter = require('./routes/pharmacy');
 
 //tell app to use this endpoint
 app.use('/api/onboarding', onboardingRouter);
 app.use('/api/survey', surveyRouter);
 app.use('/api/user', userRouter);
+app.use('/api/pharmacy', pharmacyRouter);
 
 
 // //default route
