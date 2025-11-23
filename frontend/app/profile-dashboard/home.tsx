@@ -254,9 +254,9 @@ export default function Home() {
         </Text>
     </Pressable>
 
-    {/* IMAGE */}
+{/* IMAGE */}
     <Image
-        source={require("../../assets/images/medicine.png")}
+        source={require("../../assets/images/medguide.png")}
         style={{
             width: 220,
             height: 220,

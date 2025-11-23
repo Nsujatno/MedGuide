@@ -53,7 +53,7 @@ export default function Index() {
 
      
       <Image
-        source={require("../../assets/images/medicine.png")}
+        source={require("../assets/images/medguide.png")}
         style={{
           position: "absolute", 
           width: 223,

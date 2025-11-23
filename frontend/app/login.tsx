@@ -43,7 +43,7 @@ export default function Login() {
       }}
     >
     <Image
-            source={require("/Users/aditikammaradi/Desktop/MedGApp/MedGuide/frontend/assets/Screenshot 2025-10-30 at 3.03.28 AM.png")}
+            source={require( "../assets/images/medguide.png" )}
             style={{
               position: "absolute", 
               width: 90,

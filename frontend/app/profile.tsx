@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import { Text, View, Image, Pressable } from "react-native";
 import {useLocalSearchParams, useRouter} from "expo-router"; 
 import { useFonts, DidactGothic_400Regular } from "@expo-google-fonts/didact-gothic";
-export default function Profie() {
+export default function Profile() {
     const router = useRouter(); 
     const {firstNameLetter} = useLocalSearchParams(); 
     const [showMenu, setShowMenu] = useState(false); 
@@ -111,7 +111,7 @@ export default function Profie() {
           Profile
         </Text>
         <Image
-        source={require("/Users/aditikammaradi/Desktop/MedGApp/MedGuide/frontend/assets/Screenshot 2025-10-30 at 3.03.28 AM.png")}
+        source={require("../assets/images/medguide.png")}
         style={{
           position: "absolute", 
           width: 223,

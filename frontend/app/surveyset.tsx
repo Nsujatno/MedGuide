@@ -111,7 +111,7 @@ export default function Profie() {
           Profile
         </Text>
         <Image
-        source={require("/Users/aditikammaradi/Desktop/MedGApp/MedGuide/frontend/assets/Screenshot 2025-10-23 at 6.31.10 PM.png")}
+        source={require("../assets/images/medguide.png")}
         style={{
           position: "absolute", 
           width: 223,
