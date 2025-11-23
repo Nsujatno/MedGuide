@@ -2,12 +2,12 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 
-
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 
+const toRadians = (degrees) => degrees * (Math.PI / 180);
 
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
- const R = 6371;
+ const R = 3958.8; 
  const dLat = toRadians(lat2 - lat1);
  const dLon = toRadians(lon2 - lon1);
   const a =
@@ -17,10 +17,6 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
  return Math.round(R * c * 100) / 100;
 };
-
-
-const toRadians = (degrees) => degrees * (Math.PI / 180);
-
 
 router.get('/nearby', async (req, res) => {
  try {
@@ -72,15 +68,15 @@ router.get('/nearby', async (req, res) => {
        headers: {
          'Content-Type': 'application/json',
          'X-Goog-Api-Key': GOOGLE_API_KEY,
-         'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.businessStatus'
-       }
-     }
-   );
-
-
-   console.log('Response Status:', response.status);
-   console.log('Response Data:', JSON.stringify(response.data, null, 2));
-
+         'X-Goog-FieldMask': [
+            'places.id',
+            'places.displayName',
+            'places.formattedAddress',
+            'places.location'
+            ].join(',')
+        }
+      }
+    );
 
    const pharmacies = response.data.places?.map(place => {
      const distance = calculateDistance(
@@ -91,50 +87,42 @@ router.get('/nearby', async (req, res) => {
      );
 
 
-     return {
-       id: place.id,
-       name: place.displayName?.text || 'Unknown Pharmacy',
-       address: place.formattedAddress || 'Address not available',
-       location: {
-         latitude: place.location.latitude,
-         longitude: place.location.longitude
-       },
-       distance: distance,
-       distanceText: distance < 1 ? `${Math.round(distance * 1000)} m` : `${distance} km`,
-       rating: place.rating || null,
-       userRatingsTotal: place.userRatingCount || 0,
-       businessStatus: place.businessStatus || 'OPERATIONAL'
+      return {
+        id: place.id,
+        name: place.displayName?.text || 'Unknown Pharmacy',
+        address: place.formattedAddress || 'Address not available',
+        location: {
+          latitude: place.location.latitude,
+          longitude: place.location.longitude
+        },
+        distance,
+        distanceText: `${distance} mi`
      };
    }) || [];
-
-
+   
    pharmacies.sort((a, b) => a.distance - b.distance);
 
+    res.json({
+      success: true,
+      count: pharmacies.length,
+      userLocation: { latitude: lat, longitude: lng },
+      pharmacies
+    });
+  } catch (error) {
+    console.error('Error Details:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      headers: error.response?.headers
+    });
 
-   res.json({
-     success: true,
-     count: pharmacies.length,
-     userLocation: { latitude: lat, longitude: lng },
-     pharmacies: pharmacies
-   });
-
-
- } catch (error) {
-   console.error('Error Details:', {
-     status: error.response?.status,
-     statusText: error.response?.statusText,
-     data: error.response?.data,
-     headers: error.response?.headers
-   });
-  
-   res.status(error.response?.status || 500).json({
-     success: false,
-     error: 'Failed to fetch nearby pharmacies',
-     message: error.response?.data?.error?.message || error.message,
-     details: error.response?.data
-   });
- }
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: 'Failed to fetch nearby pharmacies',
+      message: error.response?.data?.error?.message || error.message,
+      details: error.response?.data
+    });
+  }
 });
-
 
 module.exports = router;
