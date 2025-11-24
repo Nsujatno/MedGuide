@@ -1,128 +1,137 @@
-import { Text, View, Image, Pressable } from "react-native";
-import { useFonts, JosefinSans_400Regular } from "@expo-google-fonts/josefin-sans";
-import {useRouter} from "expo-router"; 
+import { useEffect } from 'react';
+import { router } from 'expo-router';
 
-
+import { Redirect } from 'expo-router';
 
 export default function Index() {
-  const router = useRouter(); 
-  const [fontsLoaded] = useFonts({
-    JosefinSans_400Regular,
-  });
+  return <Redirect href="/profile-dashboard/home" />;
+}
 
-  if (!fontsLoaded) {
-    return null; 
-  }
+// import { Text, View, Image, Pressable } from "react-native";
+// import { useFonts, JosefinSans_400Regular } from "@expo-google-fonts/josefin-sans";
+// import {useRouter} from "expo-router"; 
 
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "flex-start",
-        alignItems: "center",
-        backgroundColor: "#EAB2B2",
-        paddingTop: 80,
-      }}
-    >
+
+
+// export default function Index() {
+//   const router = useRouter(); 
+//   const [fontsLoaded] = useFonts({
+//     JosefinSans_400Regular,
+//   });
+
+//   if (!fontsLoaded) {
+//     return null; 
+//   }
+
+//   return (
+//     <View
+//       style={{
+//         flex: 1,
+//         justifyContent: "flex-start",
+//         alignItems: "center",
+//         backgroundColor: "#EAB2B2",
+//         paddingTop: 80,
+//       }}
+//     >
      
-      <Text
-        style={{
-          fontFamily: "JosefinSans_400Regular",
-          fontSize: 40,
-          textAlign: "center",
-          color: "#8B0000",
-          marginTop: 20,
-        }}
-      >
-        Welcome To{"\n"}MedGuide
-      </Text>
+//       <Text
+//         style={{
+//           fontFamily: "JosefinSans_400Regular",
+//           fontSize: 40,
+//           textAlign: "center",
+//           color: "#8B0000",
+//           marginTop: 20,
+//         }}
+//       >
+//         Welcome To{"\n"}MedGuide
+//       </Text>
 
     
-      <Text
-        style={{
-          fontFamily: "JosefinSans_400Regular",
-          fontSize: 20,
-          color: "#FFFFFF",
-          textAlign: "center",
-          marginTop: 10,
-          marginBottom: 250,
-        }}
-      >
-        Your Smart Guide
-      </Text>
+//       <Text
+//         style={{
+//           fontFamily: "JosefinSans_400Regular",
+//           fontSize: 20,
+//           color: "#FFFFFF",
+//           textAlign: "center",
+//           marginTop: 10,
+//           marginBottom: 250,
+//         }}
+//       >
+//         Your Smart Guide
+//       </Text>
 
      
-      <Image
-        source={require("../assets/images/medguide.png")}
-        style={{
-          position: "absolute", 
-          width: 223,
-          height: 223,
-          top: 220, 
-          left: 100, 
-        }}
-      />
+//       <Image
+//         source={require("../assets/images/medguide.png")}
+//         style={{
+//           position: "absolute", 
+//           width: 223,
+//           height: 223,
+//           top: 220, 
+//           left: 100, 
+//         }}
+//       />
 
       
-      <Text
-        style={{
-          fontFamily: "JosefinSans_400Regular",
-          fontSize: 15,
-          color: "#FFFFFF",
-          textAlign: "center",
-          lineHeight: 20,
-          maxWidth: 300,
-          marginHorizontal: "auto",
-          marginBottom: 30,
-        }}
-      >
-        Explore our custom-trained AI model employing data-driven recommendations
-        for over-the-counter medication.
-      </Text>
+//       <Text
+//         style={{
+//           fontFamily: "JosefinSans_400Regular",
+//           fontSize: 15,
+//           color: "#FFFFFF",
+//           textAlign: "center",
+//           lineHeight: 20,
+//           maxWidth: 300,
+//           marginHorizontal: "auto",
+//           marginBottom: 30,
+//         }}
+//       >
+//         Explore our custom-trained AI model employing data-driven recommendations
+//         for over-the-counter medication.
+//       </Text>
 
     
-      <Pressable
-        onPress={() => router.push('/login')} 
-        style={{
-          backgroundColor: "#8B0000", 
-          paddingVertical: 12,
-          paddingHorizontal: 90,
-          borderRadius: 25,
-          marginTop: 0,
-        }}
-      >
-        <Text
-          style={{
-            color: "white",
-            fontSize: 18,
-            fontFamily: "JosefinSans_400Regular",
-            textAlign: "center",
-          }}
-        >
-          Log In
-        </Text>
-      </Pressable>
-      <Pressable
-        onPress={() => router.push('/signUp')} 
-        style={{
-          backgroundColor: "#b15454ff", 
-          paddingVertical: 12,
-          paddingHorizontal: 40,
-          borderRadius: 25,
-          marginTop: 20,
-        }}
-      >
-        <Text
-          style={{
-            color: "white",
-            fontSize: 18,
-            fontFamily: "JosefinSans_400Regular",
-            textAlign: "center",
-          }}
-        >
-          Create an Account
-        </Text>
-      </Pressable>
-    </View>
-  );
-}
+//       <Pressable
+//         onPress={() => router.push('/login')} 
+//         style={{
+//           backgroundColor: "#8B0000", 
+//           paddingVertical: 12,
+//           paddingHorizontal: 90,
+//           borderRadius: 25,
+//           marginTop: 0,
+//         }}
+//       >
+//         <Text
+//           style={{
+//             color: "white",
+//             fontSize: 18,
+//             fontFamily: "JosefinSans_400Regular",
+//             textAlign: "center",
+//           }}
+//         >
+//           Log In
+//         </Text>
+//       </Pressable>
+//       <Pressable
+//         onPress={() => router.push('/signUp')} 
+//         style={{
+//           backgroundColor: "#b15454ff", 
+//           paddingVertical: 12,
+//           paddingHorizontal: 40,
+//           borderRadius: 25,
+//           marginTop: 20,
+//         }}
+//       >
+//         <Text
+//           style={{
+//             color: "white",
+//             fontSize: 18,
+//             fontFamily: "JosefinSans_400Regular",
+//             textAlign: "center",
+//           }}
+//         >
+//           Create an Account
+//         </Text>
+//       </Pressable>
+//     </View>
+//   );
+// }
