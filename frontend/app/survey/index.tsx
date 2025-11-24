@@ -629,7 +629,7 @@ export default function Survey() {
 
       {/* Navigation */}
       <View style={styles.navigationContainer}>
-        {currentStep > 0 && (
+        {currentStep > 0 ? (
           <TouchableOpacity 
             style={styles.backButton}
             onPress={handleBack}
@@ -638,12 +638,20 @@ export default function Survey() {
             <Ionicons name="arrow-back" size={20} color="#666" />
             <Text style={styles.backButtonText}>Back</Text>
           </TouchableOpacity>
+        ) : (
+          <TouchableOpacity 
+            style={styles.exitButton}
+            onPress={() => router.back()}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="close" size={22} color="#666" />
+            <Text style={styles.exitButtonText}>Exit Survey</Text>
+          </TouchableOpacity>
         )}
         
         <TouchableOpacity 
           style={[
             styles.continueButton,
-            currentStep === 0 && { marginLeft: 'auto' },
             !canProceed() && styles.continueButtonDisabled
           ]}
           onPress={handleNext}
@@ -660,6 +668,7 @@ export default function Survey() {
 }
 
 const styles = StyleSheet.create({
+  // ... (keep all your existing styles)
   container: {
     flex: 1,
   },
@@ -919,7 +928,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#888',
   },
-  navigationContainer: {
+ navigationContainer: {
     position: 'absolute',
     bottom: 0,
     left: 0,
@@ -930,6 +939,27 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     paddingTop: 20,
     backgroundColor: 'transparent',
+  },
+  exitButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+    gap: 8,
+    borderWidth: 1.5,
+    borderColor: '#e0e0e0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  exitButtonText: {
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '600',
   },
   backButton: {
     flexDirection: 'row',
