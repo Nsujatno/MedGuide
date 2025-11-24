@@ -7,22 +7,41 @@ export default function ProfileLayout() {
       screenOptions={{
         tabBarShowLabel: false,
         headerShown: false,
+        tabBarStyle: {
+          position: 'absolute',
+          bottom: 20,
+          left: 0,
+          right: 0,
+          marginHorizontal: 80,    // Add margin on both sides
+          backgroundColor: '#000000',
+          borderRadius: 40,
+          height: 60,
+          paddingBottom: 0,
+          paddingTop: 0,
+          borderTopWidth: 0,
+          elevation: 10,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 10,
+        },
+        tabBarItemStyle: {
+          paddingVertical: 8,
+        },
       }}
     >
       <Tabs.Screen
         name="medication"
         options={{
-          tabBarIcon: ({ focused, color, size }) => (
+          tabBarIcon: ({ focused }) => (
             <MaterialCommunityIcons
               name="pill"
-              size={28}
-              color={focused ? "#610f06ff" : "#cca0a0ff"}
+              size={26}
+              color={focused ? "#FF6B9D" : "#FFFFFF"}
             />
           ),
         }}
       />
-
-      
 
       <Tabs.Screen
         name="home"
@@ -30,21 +49,8 @@ export default function ProfileLayout() {
           tabBarIcon: ({ focused }) => (
             <Ionicons
               name="home"
-              size={30}
-              color={focused ? "#610f06ff" : "#cca0a0ff"}
-            />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="calendar"
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <Ionicons
-              name="calendar"
-              size={28}
-              color={focused ? "#610f06ff" : "#cca0a0ff"}
+              size={26}
+              color={focused ? "#FF6B9D" : "#FFFFFF"}
             />
           ),
         }}
@@ -56,8 +62,8 @@ export default function ProfileLayout() {
           tabBarIcon: ({ focused }) => (
             <Ionicons
               name="location"
-              size={28}
-              color={focused ? "#610f06ff" : "#cca0a0ff"}
+              size={26}
+              color={focused ? "#FF6B9D" : "#FFFFFF"}
             />
           ),
         }}
