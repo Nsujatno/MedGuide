@@ -1,3 +1,12 @@
+// import { useEffect } from 'react';
+// import { router } from 'expo-router';
+
+// import { Redirect } from 'expo-router';
+
+// export default function Index() {
+//   return <Redirect href="/profile-dashboard/home" />;
+// }
+
 import { Text, View, Image, Pressable } from "react-native";
 import { useFonts, JosefinSans_400Regular } from "@expo-google-fonts/josefin-sans";
 import {useRouter} from "expo-router"; 
