@@ -77,7 +77,7 @@ export default function MedicationScreen() {
           <TouchableOpacity 
             style={styles.button}
             onPress={() => {
-              console.log('Follow-up survey coming soon');
+              router.push('/followup');
             }}
             activeOpacity={0.8}
           >
