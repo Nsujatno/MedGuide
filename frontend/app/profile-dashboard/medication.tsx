@@ -1,10 +1,24 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, TouchableWithoutFeedback } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
 export default function MedicationScreen() {
+  const [showMenu, setShowMenu] = useState(false);
+
+  const handleLogout = () => {
+    setShowMenu(false);
+    console.log('Logging out...');
+    router.replace('/login');
+  };
+
+  const handleSettings = () => {
+    setShowMenu(false);
+    console.log('Opening settings...');
+    // router.push('/settings');
+  };
+
   return (
     <LinearGradient
       colors={['#fff', '#f5b6d2']}
@@ -21,7 +35,10 @@ export default function MedicationScreen() {
           </View>
         </View>
         
-        <TouchableOpacity style={styles.profileButton}>
+        <TouchableOpacity 
+          style={styles.profileButton}
+          onPress={() => setShowMenu(true)}
+        >
           <Ionicons name="person" size={22} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -47,7 +64,6 @@ export default function MedicationScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Follow-up Survey Card */}
         <View style={styles.card}>
           <View style={styles.cardIconBadge}>
             <Ionicons name="chatbox-ellipses" size={28} color="#FF6B9D" />
@@ -61,7 +77,6 @@ export default function MedicationScreen() {
           <TouchableOpacity 
             style={styles.button}
             onPress={() => {
-              // Navigate to follow-up survey (create later)
               console.log('Follow-up survey coming soon');
             }}
             activeOpacity={0.8}
@@ -72,7 +87,41 @@ export default function MedicationScreen() {
         </View>
       </View>
 
-      {/* Bottom Navigation Spacer */}
+      <Modal
+        visible={showMenu}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowMenu(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setShowMenu(false)}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={styles.menuContainer}>
+                <TouchableOpacity 
+                  style={styles.menuItem}
+                  onPress={handleSettings}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons name="settings-outline" size={22} color="#FF6B9D" />
+                  <Text style={styles.menuItemText}>Settings</Text>
+                </TouchableOpacity>
+
+                <View style={styles.menuDivider} />
+
+                <TouchableOpacity 
+                  style={styles.menuItem}
+                  onPress={handleLogout}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons name="log-out-outline" size={22} color="#FF6B9D" />
+                  <Text style={styles.menuItemText}>Logout</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
       <View style={styles.tabBarSpacer} />
     </LinearGradient>
   );
@@ -124,9 +173,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 4,
+
   },
   content: {
     flex: 1,
@@ -174,16 +221,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#FF6B9D',
     paddingVertical: 14,
     paddingHorizontal: 24,
     borderRadius: 25,
     gap: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowColor: '#FF6B9D',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
   },
   buttonText: {
     fontSize: 15,
@@ -192,5 +239,41 @@ const styles = StyleSheet.create({
   },
   tabBarSpacer: {
     height: 100,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+    paddingTop: 100,
+    paddingRight: 24,
+  },
+  menuContainer: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    width: 180,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+    overflow: 'hidden',
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    gap: 12,
+  },
+  menuItemText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FF6B9D',
+  },
+  menuDivider: {
+    height: 1,
+    backgroundColor: '#f0f0f0',
+    marginHorizontal: 12,
   },
 });
