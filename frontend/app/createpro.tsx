@@ -1,766 +1,909 @@
-import React, {useState} from "react"; 
-import { Text, TextInput, View, Image, Pressable,ScrollView } from "react-native";
-import {useLocalSearchParams, useRouter} from "expo-router"; 
-import { useFonts, DidactGothic_400Regular } from "@expo-google-fonts/didact-gothic";
-import Slider from "@react-native-community/slider";
-export default function CreatePro() {
-    const router = useRouter(); 
-    const {firstNameLetter} = useLocalSearchParams(); 
-    const [showMenu, setShowMenu] = useState(false); 
-    const [height, setHeight] = useState(""); 
-    const [weight, setWeight] = useState(""); 
-    const [showMenu2, setShowMenu2] = useState(false); 
-    const [selectedGender, setSelectedGender] = useState(""); 
-    const [selectedAnswer1, setSelectedAnswer1] = useState(""); 
-    const [stress, setStress] = useState(5); 
-    const[food, setSelectedFood] = useState<string[]>([]); 
-    const foodAllergies = ["Peanuts", "Dairy", "Gluten", "Treenuts", "Eggs", "Seafood", "Soy","Penicillin","Nonsteroidal anti-inflammatory drugs (NSAIDs),","Opiates"];
-    const[other1, setOther1] = useState(""); 
-    const[drugs,setDrugs]=useState("");
-    const[drugsConsumed, setDrugsConsumed]=useState(""); 
-    const[alcohol,setAlcohol]=useState(""); 
-    const[pills,setPills]=useState(""); 
-    const [error, setError] = useState(""); 
-    
-    const [fontsLoaded] = useFonts({
-      DidactGothic_400Regular,
-    });
-        if (!fontsLoaded) return null;
-    const validate = () => {
-      if (
-        !height.trim() ||
-        !weight.trim() ||
-        !selectedGender.trim() ||
-        !selectedAnswer1.trim() ||
-        !drugs ||
-        !alcohol ||
-        !pills
-      ) {
-        setError("Please fill in required fields");
-        return;
-      }
-      setError("");
-      // push to the home page
-      router.push("/profile-dashboard/home");
+import React, { useState } from 'react';
+import { 
+  View, 
+  Text, 
+  TextInput, 
+  TouchableOpacity, 
+  StyleSheet, 
+  ScrollView, 
+  Image, 
+  KeyboardAvoidingView,
+  Platform,
+  LayoutAnimation,
+  UIManager,
+  ActivityIndicator,
+  Alert
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+
+if (Platform.OS === 'ios' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+const CustomLayoutSpring = {
+  duration: 400,
+  create: {
+    type: LayoutAnimation.Types.spring,
+    property: LayoutAnimation.Properties.opacity,
+    springDamping: 0.8,
+  },
+  update: {
+    type: LayoutAnimation.Types.spring,
+    springDamping: 0.8,
+  },
+};
+
+export default function ProfileSetupScreen() {
+  const [step, setStep] = useState(0); 
+  const [isSubmitting, setIsSubmitting] = useState(false); 
+  
+  const [formData, setFormData] = useState({
+    height: '',
+    weight: '',
+    sex: '', 
+    sexOther: '',
+    isPregnant: null, 
+    stressLevel: 0, 
+    pharmacy1: '',
+    pharmacy2: '',
+    allergies: '',
+    consumesDrugs: null, 
+    consumesAlcohol: null,
+    comfortableWithPills: null
+  });
+
+  const updateField = (key: string, value: any) => {
+    setFormData(prev => ({ ...prev, [key]: value }));
+  };
+
+  const validateStep = (currentStep: number) => {
+    switch (currentStep) {
+      case 1: 
+        if (!formData.height || !formData.weight) {
+          Alert.alert("Required", "Please enter your height and weight.");
+          return false;
+        }
+        return true;
+      case 2: 
+        if (!formData.sex) {
+          Alert.alert("Required", "Please select your sex.");
+          return false;
+        }
+        if (formData.sex === 'other' && !formData.sexOther) {
+           Alert.alert("Required", "Please specify your sex.");
+           return false;
+        }
+        if (formData.sex === 'female' && formData.isPregnant === null) {
+          Alert.alert("Required", "Please answer if you are pregnant.");
+          return false;
+        }
+        return true;
+      case 3: 
+        if (formData.stressLevel === 0) {
+          Alert.alert("Required", "Please rate your stress level.");
+          return false;
+        }
+        return true;
+      case 4: 
+        if (!formData.pharmacy1) {
+           Alert.alert("Required", "Please enter at least one pharmacy address.");
+           return false;
+        }
+        if (formData.consumesDrugs === null) {
+           Alert.alert("Required", "Please answer if you consume drugs.");
+           return false;
+        }
+        if (formData.consumesAlcohol === null) {
+           Alert.alert("Required", "Please answer if you consume alcohol.");
+           return false;
+        }
+        if (formData.comfortableWithPills === null) {
+           Alert.alert("Required", "Please answer if you are comfortable with pills.");
+           return false;
+        }
+        return true;
+      default:
+        return true;
+    }
+  };
+
+  const handleNext = () => {
+    if (!validateStep(step)) return;
+
+    if (step === 5) {
+      setIsSubmitting(true);
+      
+      console.log("FINAL SUBMISSION DATA:", formData); 
+
+      setTimeout(() => {
+        router.replace('/profile-dashboard/home'); 
+      }, 800); 
+    } else {
+      LayoutAnimation.configureNext(CustomLayoutSpring);
+      setStep(step + 1);
+    }
+  };
+
+  const handleBack = () => {
+    LayoutAnimation.configureNext(CustomLayoutSpring);
+    if (step > 1) setStep(step - 1);
+  };
+
+
+  const ProgressBar = ({ progress }: { progress: number }) => (
+    <View style={styles.progressContainer}>
+      <View style={[styles.progressBar, { width: `${progress}%` }]} />
+    </View>
+  );
+
+  const SelectButton = ({ label, selected, onPress }: any) => (
+    <TouchableOpacity 
+      style={[styles.selectBtn, selected && styles.selectBtnActive]} 
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
+      <Text style={[styles.selectBtnText, selected && styles.selectBtnTextActive]}>{label}</Text>
+    </TouchableOpacity>
+  );
+
+  const RadioOption = ({ label, active, onPress }: any) => (
+    <TouchableOpacity style={styles.radioRow} onPress={onPress} activeOpacity={0.6}>
+      <View style={[styles.radioCircle, active && styles.radioCircleActive]}>
+        {active && <View style={styles.radioDot} />}
+      </View>
+      <Text style={[styles.radioText, active && styles.radioTextActive]}>{label}</Text>
+    </TouchableOpacity>
+  );
+
+
+  const renderStep0_Welcome = () => (
+    <LinearGradient colors={['#FFB3D1', '#FFE4F0']} style={styles.fullScreenContainer}>
+      <View style={styles.welcomeCard}>
+        <Image source={require('../assets/images/medguide.png')} style={styles.logo} resizeMode="contain"/>
+        <Text style={styles.welcomeTitle}>Profile Set Up</Text>
+        <Text style={styles.welcomeDesc}>
+          Let's customize Medguide for you. Just a few quick details to get started.
+        </Text>
+        <TouchableOpacity 
+          style={styles.startButton} 
+          activeOpacity={0.8}
+          onPress={() => {
+             LayoutAnimation.configureNext(CustomLayoutSpring);
+             setStep(1);
+          }}
+        >
+          <Text style={styles.startButtonText}>Get Started</Text>
+          <Ionicons name="arrow-forward" size={20} color="#1A1A1A" />
+        </TouchableOpacity>
+      </View>
+    </LinearGradient>
+  );
+
+  const renderStep1_Physical = () => (
+    <View style={styles.stepContent}>
+      <View style={styles.headerBlock}>
+        <Text style={styles.stepTitle}>Let's Begin.</Text>
+        <ProgressBar progress={20} />
+      </View>
+      
+      <View style={styles.centerForm}>
+        <Text style={styles.questionLabel}>What is your height?</Text>
+        <View style={styles.inputRow}>
+          <TextInput 
+            style={styles.fixedWidthInput} 
+            keyboardType="numeric"
+            placeholder="0"
+            placeholderTextColor="#CCC"
+            value={formData.height}
+            onChangeText={(t) => updateField('height', t)}
+            textAlign="center" 
+          />
+          <View style={styles.unitBadge}><Text style={styles.unitText}>inches</Text></View>
+        </View>
+
+        <View style={styles.spacerLarge} />
+
+        <Text style={styles.questionLabel}>Weight?</Text>
+        <View style={styles.inputRow}>
+          <TextInput 
+            style={styles.fixedWidthInput} 
+            keyboardType="numeric"
+            placeholder="0"
+            placeholderTextColor="#CCC"
+            value={formData.weight}
+            onChangeText={(t) => updateField('weight', t)}
+            textAlign="center" 
+          />
+          <View style={styles.unitBadge}><Text style={styles.unitText}>lbs</Text></View>
+        </View>
+      </View>
+    </View>
+  );
+
+  const renderStep2_Sex = () => (
+    <View style={styles.stepContent}>
+      <View style={styles.headerBlock}>
+        <Text style={styles.stepTitle}>Few more to go...</Text>
+        <ProgressBar progress={40} />
+      </View>
+
+      <View style={styles.formGroup}>
+        <Text style={styles.questionLabel}>Sex</Text>
+        <View style={styles.selectRow}>
+          {['Female', 'Male', 'Other'].map((opt) => (
+            <SelectButton 
+              key={opt} 
+              label={opt} 
+              selected={formData.sex === opt.toLowerCase()} 
+              onPress={() => {
+                // If switching away from 'other', clear the custom text
+                if (opt.toLowerCase() !== 'other') {
+                   setFormData(prev => ({ ...prev, sex: opt.toLowerCase(), sexOther: '' }));
+                } else {
+                   setFormData(prev => ({ ...prev, sex: 'other' }));
+                }
+              }}
+            />
+          ))}
+        </View>
+
+        {formData.sex === 'other' && (
+          <View style={styles.fadeContainer}>
+            <Text style={styles.subLabel}>Please specify</Text>
+            <TextInput 
+              style={{
+                backgroundColor: '#F9F9F9',
+                borderRadius: 14,
+                padding: 16,
+                fontSize: 16,
+                color: '#1A1A1A',
+                borderWidth: 1,
+                borderColor: '#F0F0F0',
+                width: '100%', 
+              }}
+              placeholder="Type here..."
+              placeholderTextColor="#CCC"
+              value={formData.sexOther}
+              onChangeText={(text) => {
+                setFormData(prev => ({ ...prev, sexOther: text }));
+              }}
+            />
+          </View>
+        )}
+
+        {formData.sex === 'female' && (
+          <View style={styles.fadeContainer}>
+            <View style={styles.divider} />
+            <Text style={styles.questionLabelSmall}>Are you pregnant?</Text>
+            <View style={styles.radioGroup}>
+              <RadioOption 
+                label="Yes" 
+                active={formData.isPregnant === true} 
+                onPress={() => updateField('isPregnant', true)} 
+              />
+              <RadioOption 
+                label="No" 
+                active={formData.isPregnant === false} 
+                onPress={() => updateField('isPregnant', false)} 
+              />
+            </View>
+          </View>
+        )}
+      </View>
+    </View>
+  );
+
+
+  const renderStep3_Stress = () => {
+    const getStressColor = (level: number) => {
+      if (level === 0) return '#F0F0F0';
+      if (level <= 3) return '#A8E6CF'; 
+      if (level <= 7) return '#FFD3B6'; 
+      return '#FFAAA5'; 
     };
 
     return (
-        <ScrollView
-        contentContainerStyle={{ flexGrow: 1,
-        justifyContent: "flex-start",
-        alignItems: "flex-start",
-        backgroundColor: "#eab2b2ff",
-        paddingTop: 50,
-        paddingHorizontal: 30,
-        paddingBottom: 100,
-        }}
-        >
-        
-        <Text
-          style={{
-            color: "black",
-            fontSize: 30,
-            fontFamily: "DidactGothic_400Regular",
-            fontWeight: '900',
-            
-            marginBottom: 15,
-            textAlign: "center",
-            maxWidth: 400,
-            alignSelf: "center",
-          }}
-        >
-          Edit Profile
-        </Text>
-        <Pressable
-                onPress={() => setShowMenu(!showMenu)}
-        
-                style = {{
-                    position: "absolute", 
-                    top: 22, 
-                    right: 20,
-                    width: 40, 
-                    height: 40, 
-                    borderRadius: 25, 
-                    backgroundColor: "#67130f",
-                    justifyContent: "center",
-                    alignItems: "center", 
-                    zIndex: 10, 
-                }}
-                >
-                    <Text style = {{ color: "white", fontSize: 24, fontWeight: "200"}}>
-                        {firstNameLetter || "A"}
-                    </Text>
-                    </Pressable>
-                {showMenu && (
-                    <View
-                    style = {{
-                        position: "absolute", 
-                        top: 70, 
-                        right: 20, 
-                        backgroundColor: "white", 
-                        borderRadius: 10, 
-                        borderWidth: 1, 
-                        borderColor: "#67130f", 
-                        shadowColor: "#000", 
-                        shadowOffset: {width: 0, height: 2}, 
-                        shadowOpacity: 0.2, 
-                        shadowRadius: 4, 
-                        zIndex: 20, 
-                    }}
-                >
-                    <Pressable 
-                    onPress={() => {
-                        setShowMenu(false); 
-                        router.push("/createpro"); 
-        
-                    }}
-                    style = {{ padding: 10}}
-                > 
-                <Text 
-                style={{
-                    fontFamily: "DidactGothic_400Regular", 
-                    color: "#67130f",
-                    fontSize: 16,
-                }}
-                >
-                    Edit Profile
-                </Text>
-                </Pressable>
-                <View style={{ height: 1, backgroundColor: "#ccc" }} />
-                <Pressable 
-                    onPress={() => {
-                        setShowMenu(false); 
-                        router.push("/login"); 
-                    }}
-                    style = {{padding: 10}}
-                >
-                    <Text
-                    style={{
-                        fontFamily: "DidactGothic_400Regular",
-                        color: "#67130f",
-                        fontSize: 16,
-                    }}
-                    >
-                        Log Out
-                    </Text>
-                </Pressable>
-                </View>
-                )}
-                <View
-        
-                      >
-                        <Text
-                          style={{
-                            fontFamily: "DidactGothic_400Regular",
-                            fontSize: 18,
-                            color: "#000000ff",
-                            marginBottom: 12,
+      <View style={styles.stepContent}>
+        <View style={styles.headerBlock}>
+          <Text style={styles.stepTitle}>Halfway there!</Text>
+          <ProgressBar progress={60} />
+        </View>
 
-                          }}
-                        >
-                          Height
-                        </Text>
-                
-                        <TextInput
-                          placeholder="Enter your height"
-                          placeholderTextColor="#000000ff"
-                          
-                          value={height}
-                          onChangeText={setHeight}
-                          style={{
-                            backgroundColor: "#c2c0c0ff",
-                            borderRadius: 3,
-                            paddingVertical: 10,
-                            paddingHorizontal: 10,
-                            fontSize: 14,
-                            color: "#383636ff",
-                            borderWidth: 1,
-                            borderColor: "#000000ff",
-                            width: 350,
-                            
-                          }}
-                        />
-                      </View>
-                      <View
-        
-                      >
-                        <Text
-                          style={{
-                            fontFamily: "DidactGothic_400Regular",
-                            fontSize: 18,
-                            color: "#000000ff",
-                            marginBottom: 10,
-                            marginTop: 10,
-
-                          }}
-                        >
-                          Weight
-                        </Text>
-                
-                        <TextInput
-                          placeholder="Enter your weight"
-                          placeholderTextColor="#000000ff"
-                          
-                          value={weight}
-                          onChangeText={setWeight}
-                          style={{
-                            backgroundColor: "#c2c0c0ff",
-                            borderRadius: 3,
-                            paddingVertical: 10,
-                            paddingHorizontal: 10,
-                            
-                            fontSize: 14,
-                            color: "#000000ff",
-                            borderWidth: 1,
-                            borderColor: "#000000ff",
-                            width: 350,
-                            
-                          }}
-                        />
-                        </View>
-                        <View style={{ marginTop: 15}}>
-                        <Text
-                        style={{
-            fontFamily: "DidactGothic_400Regular",
-            fontSize: 18,
-            color: "#000000ff",
-            marginBottom: 10,
-          }}
-        >
-          Gender
-        </Text>
-                         <Pressable
-                onPress={() => setShowMenu2(!showMenu2)}
-        
-                style = {{
-                    backgroundColor: "#c2c0c0ff",
-            borderRadius: 3,
-            borderWidth: 1,
-            borderColor: "#000000ff",
-            width: 350,
-            height: 45,
-            justifyContent: "center",
-            paddingHorizontal: 10,
-                }}
-                >
-                    <Text style = {{ fontFamily: "DidactGothic_400Regular", fontSize: 14, color: "black"}}>
-                        {selectedGender || "Select Gender"}
-                    </Text>
-                    </Pressable>
-                {showMenu2 && (
-                    <View
-                    style = {{
-                        position: "absolute", 
-                        top: 70, 
-                        left: 30,
-                        
-                        backgroundColor: "white", 
-                        borderRadius: 10, 
-                        
-                        borderWidth: 1, 
-                        borderColor: "#67130f", 
-                        shadowColor: "#000", 
-                        shadowOffset: {width: 0, height: 2}, 
-                        shadowOpacity: 0.2, 
-                        shadowRadius: 4, 
-                        zIndex: 20, 
-                        width: 200,
-                    }}
-                >
-                    {["Male", "Female", "Other"].map((gender)=> (
-                    <Pressable 
-                    key={gender}
-                    onPress={() => {
-                        setSelectedGender(gender); 
-                        setShowMenu2(false); 
-                        
-        
-                    }}
-                    style = {{ padding: 10}}
-                > 
-                <Text 
-                style={{
-                    fontFamily: "DidactGothic_400Regular", 
-                    color: "#67130f",
-                    fontSize: 16,
-                }}
-                >
-                    {gender}
-                </Text>
-                </Pressable>
-                    ))}
-
-                <View style={{ height: 1, backgroundColor: "#ccc" }} />
-                
-                      </View>
-
-                   
-                      
-                )}
-                </View>
-                <View style ={{marginTop: 20}}>
-                    <Text
-                    style={{
-                        fontFamily: "DidactGothic_400Regular",
-                        fontSize: 18, 
-                        color: "#black",
-                        marginBottom: 20,
-                    }}
-                    >
-                        Are you pregnant?
-                    </Text>
-                    {["Yes","No"].map((option) =>(
-                        <Pressable
-                        key={option}
-                        onPress={() => setSelectedAnswer1(option)}
-                        style= {{
-                            flexDirection: "row",
-                            alignItems: "center", 
-                            marginBottom: 8, 
-                        }}
-                    >
-                        <View
-                        style = {{
-                            width: 20,
-                                height: 20,
-                                borderRadius: 10,
-                                borderWidth: 1,
-                                borderColor: "#000",
-                                marginRight: 10,
-                                justifyContent: "center",
-                                alignItems: "center",
-                        }}
-                        >
-                            {selectedAnswer1 === option && (
-                                <View
-                                style = {{
-                                    width: 12, 
-                                    height: 12, 
-                                    borderRadius: 6, 
-                                    backgroundColor: "darkred",
-                                }}
-                                />
-                            )}
-                        </View>
-                        <Text
-                        style ={{
-                            fontFamily: "DidactGothic_400Regular", 
-                            fontSize: 16, 
-                            color: "#000", 
-                        }}
-                        >
-                            {option}
-                        </Text>
-                    </Pressable>
-                    ))}
-                    
-                </View>
-                <View style={{ marginTop: 30, alignSelf: "center" }}>
-        <Text
-          style={{
-            fontFamily: "DidactGothic_400Regular",
-            fontSize: 18,
-            color: "#000",
-            textAlign: "center",
-            marginBottom: 15,
-          }}
-        >
-            How would you rate your stress level?
-        </Text>
-        <View style={{ width: 350, alignItems: "center" }}>
-          <Slider
-            style={{ width: "100%", height: 40 }}
-            minimumValue={0}
-            maximumValue={10}
-            step={1}
-            minimumTrackTintColor="#67130f"
-            maximumTrackTintColor="#ccc"
-            thumbTintColor="#67130f"
-            value={stress}
-            onValueChange={(val) => setStress(val)}
-          />
-          <View 
-           style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              width: "100%",
-            }}
-          >
-            <Text
-            style={{
-                fontFamily: "DidactGothic_400Regular",
-                color: "#000",
-                fontSize: 14,
-              }}
-            >
-              0
-            </Text>
-            <Text
-              style={{
-                fontFamily: "DidactGothic_400Regular",
-                color: "#000",
-                fontSize: 14,
-              }}
-            >
-              10
-            </Text>
+        <View style={styles.formGroup}>
+          <Text style={styles.questionLabel}>How would you rate your Stress Levels?</Text>
+          
+          <View style={styles.stressContainer}>
+            {[...Array(10)].map((_, i) => {
+              const level = i + 1;
+              const isSelected = formData.stressLevel >= level;
+              const isCurrent = formData.stressLevel === level;
+              
+              return (
+                <TouchableOpacity
+                  key={i}
+                  activeOpacity={0.8}
+                  style={[
+                    styles.stressDot,
+                    isSelected && { backgroundColor: getStressColor(formData.stressLevel) },
+                    isCurrent && styles.stressDotActive 
+                  ]}
+                  onPress={() => updateField('stressLevel', level)}
+                />
+              );
+            })}
           </View>
-          <Text
-          style={{
-              fontFamily: "DidactGothic_400Regular",
-              color: "#67130f",
-              fontSize: 16,
-              marginTop: 10,
-            }}
-          >
-            Stress Level: {stress}
+          
+          <Text style={[styles.stressFeedback, { color: getStressColor(formData.stressLevel || 5) }]}>
+             {formData.stressLevel === 0 ? "Select a level" :
+              formData.stressLevel <= 3 ? "Low Stress" : 
+              formData.stressLevel <= 7 ? "Moderate Stress" : "High Stress"}
           </Text>
+        </View>
+      </View>
+    );
+  };
+
+  const renderStep4_Details = () => (
+    <ScrollView 
+      contentContainerStyle={{ paddingBottom: 120 }} 
+      showsVerticalScrollIndicator={false}
+      style={styles.stepContentScroll}
+    >
+      <View style={styles.headerBlock}>
+        <Text style={styles.stepTitle}>Almost done...</Text>
+        <Text style={styles.stepSubtitle}>Just a few more details</Text>
+        <ProgressBar progress={80} />
+      </View>
+
+      <View style={styles.formGroup}>
+        <Text style={styles.sectionHeader}>Preferred Pharmacies</Text>
+        <View style={styles.inputWithLabel}>
+          <Text style={styles.inputLabelPrefix}>#1</Text>
+          <TextInput 
+            style={styles.cleanTextInput} 
+            placeholder="Enter Address" 
+            placeholderTextColor="#CCC"
+            value={formData.pharmacy1}
+            onChangeText={(t) => updateField('pharmacy1', t)}
+          />
+        </View>
+        <View style={styles.inputWithLabel}>
+          <Text style={styles.inputLabelPrefix}>#2</Text>
+          <TextInput 
+            style={styles.cleanTextInput} 
+            placeholder="Enter Address (Optional)"
+            placeholderTextColor="#CCC"
+            value={formData.pharmacy2}
+            onChangeText={(t) => updateField('pharmacy2', t)}
+          />
+        </View>
+
+        <View style={styles.divider} />
+
+        <Text style={styles.sectionHeader}>List any allergies (Optional)</Text>
+        <TextInput 
+          style={styles.cleanTextArea} 
+          placeholder="e.g. Peanuts, Penicillin..." 
+          placeholderTextColor="#CCC"
+          multiline
+          value={formData.allergies}
+          onChangeText={(t) => updateField('allergies', t)}
+        />
+
+        <View style={styles.divider} />
+
+        <View style={styles.questionRow}>
+          <Text style={styles.questionLabelInline}>Do you consume any drugs?</Text>
+          <View style={styles.radioGroupHorizontal}>
+             <RadioOption label="Yes" active={formData.consumesDrugs === true} onPress={() => updateField('consumesDrugs', true)} />
+             <View style={{width: 16}} />
+             <RadioOption label="No" active={formData.consumesDrugs === false} onPress={() => updateField('consumesDrugs', false)} />
           </View>
-       
+        </View>
+
+        <View style={styles.dividerSmall} />
+
+        <View style={styles.questionRow}>
+          <Text style={styles.questionLabelInline}>Do you consume alcohol?</Text>
+          <View style={styles.radioGroupHorizontal}>
+             <RadioOption label="Yes" active={formData.consumesAlcohol === true} onPress={() => updateField('consumesAlcohol', true)} />
+             <View style={{width: 16}} />
+             <RadioOption label="No" active={formData.consumesAlcohol === false} onPress={() => updateField('consumesAlcohol', false)} />
+          </View>
+        </View>
+        
+        <View style={styles.dividerSmall} />
+        
+        <View style={styles.questionRow}>
+          <Text style={styles.questionLabelInline}>Comfortable with pills?</Text>
+          <View style={styles.radioGroupHorizontal}>
+             <RadioOption label="Yes" active={formData.comfortableWithPills === true} onPress={() => updateField('comfortableWithPills', true)} />
+             <View style={{width: 16}} />
+             <RadioOption label="No" active={formData.comfortableWithPills === false} onPress={() => updateField('comfortableWithPills', false)} />
+          </View>
+        </View>
 
       </View>
-      
-<View style={{marginTop: 30}}>
-    <Text style={{
-        fontFamily: "DidactGothic_400Regular",
-        fontSize: 18,
-        color: "black",
-        marginBottom: 20,
-    }}>
-        Select any allergies you have
-    </Text>
+    </ScrollView>
+  );
 
-    {foodAllergies.map((option) => (
-        <Pressable
-            key={option}
-            onPress={() => {
-                if (food.includes(option)) {
-                    setSelectedFood(food.filter(item => item !== option));
-                } else {
-                    setSelectedFood([...food, option]);
-                }
-            }}
-            style={{flexDirection: "row", alignItems: "center", marginBottom: 8}}
-        >
-            <View style={{
-                width: 20,
-                height: 20,
-                borderWidth: 1,
-                borderColor: "#000",
-                justifyContent: "center",
-                alignItems: "center",
-                marginRight: 10,
-            }}>
-                {food.includes(option) && (
-                    <View style={{
-                        width: 12,
-                        height: 12,
-                        backgroundColor: "darkred",
-                    }} />
-                )}
-            </View>
-            <Text style={{
-                fontFamily: "DidactGothic_400Regular",
-                fontSize: 16,
-                color: "#000",
-            }}>
-                {option}
-            </Text>
-        </Pressable>
-    ))}
-</View>
-<View
-        
-                      >
-                        <Text
-                          style={{
-                            fontFamily: "DidactGothic_400Regular",
-                            fontSize: 18,
-                            color: "#000000ff",
-                            marginBottom: 15,
-                            marginTop: 15,
-
-                          }}
-                        >
-                          Other Allergies
-                        </Text>
-                
-                        <TextInput
-                          placeholder="Enter any other Allergies"
-                          placeholderTextColor="#000000ff"
-                          
-                          value={other1}
-                          onChangeText={setOther1}
-                          style={{
-                            backgroundColor: "#c2c0c0ff",
-                            borderRadius: 3,
-                            paddingVertical: 10,
-                            paddingHorizontal: 10,
-                            fontSize: 14,
-                            color: "#000000ff",
-                            borderWidth: 1,
-                            borderColor: "#000000ff",
-                            width: 350,
-                            
-                          }}
-                        />
-                      </View>
-                      <View style ={{marginTop: 20}}>
-                    <Text
-                    style={{
-                        fontFamily: "DidactGothic_400Regular",
-                        fontSize: 18, 
-                        color: "#black",
-                        marginBottom: 20,
-                    }}
-                    >
-                        Do you consume any drugs?
-                    </Text>
-                    {["Yes","No"].map((option) =>(
-                        <Pressable
-                        key={option}
-                        onPress={() => setDrugs(option)}
-                        style= {{
-                            flexDirection: "row",
-                            alignItems: "center", 
-                            marginBottom: 8, 
-                        }}
-                    >
-                        <View
-                        style = {{
-                            width: 20,
-                                height: 20,
-                                borderRadius: 10,
-                                borderWidth: 1,
-                                borderColor: "#000",
-                                marginRight: 10,
-                                justifyContent: "center",
-                                alignItems: "center",
-                        }}
-                        >
-                            {drugs === option && (
-                                <View
-                                style = {{
-                                    width: 12, 
-                                    height: 12, 
-                                    borderRadius: 6, 
-                                    backgroundColor: "darkred",
-                                }}
-                                />
-                            )}
-                        </View>
-                        <Text
-                        style ={{
-                            fontFamily: "DidactGothic_400Regular", 
-                            fontSize: 16, 
-                            color: "#000", 
-                        }}
-                        >
-                            {option}
-                        </Text>
-                    </Pressable>
-                    ))}
-                    
-                </View>
-                <View
-        
-                      >
-                        <Text
-                          style={{
-                            fontFamily: "DidactGothic_400Regular",
-                            fontSize: 18,
-                            color: "#000000ff",
-                            marginBottom: 12,
-                            marginTop: 20,
-
-                          }}
-                        >
-                          If yes, which drugs do you take?
-                        </Text>
-                
-                        <TextInput
-                          placeholder="Enter any drugs you take"
-                          placeholderTextColor="#000000ff"
-                          
-                          value={drugsConsumed}
-                          onChangeText={setDrugsConsumed}
-                          style={{
-                            backgroundColor: "#c2c0c0ff",
-                            borderRadius: 3,
-                            paddingVertical: 10,
-                            paddingHorizontal: 10,
-                            fontSize: 14,
-                            color: "#000000ff",
-                            borderWidth: 1,
-                            borderColor: "#000000ff",
-                            width: 350,
-                            
-                          }}
-                        />
-                      </View>
-                      <View style ={{marginTop: 20}}>
-                    <Text
-                    style={{
-                        fontFamily: "DidactGothic_400Regular",
-                        fontSize: 18, 
-                        color: "#black",
-                        marginBottom: 20,
-                    }}
-                    >
-                        Do you consume alcohol?
-                    </Text>
-                    {["Yes","No"].map((option) =>(
-                        <Pressable
-                        key={option}
-                        onPress={() => setAlcohol(option)}
-                        style= {{
-                            flexDirection: "row",
-                            alignItems: "center", 
-                            marginBottom: 8, 
-                        }}
-                    >
-                        <View
-                        style = {{
-                            width: 20,
-                                height: 20,
-                                borderRadius: 10,
-                                borderWidth: 1,
-                                borderColor: "#000",
-                                marginRight: 10,
-                                justifyContent: "center",
-                                alignItems: "center",
-                        }}
-                        >
-                            {alcohol === option && (
-                                <View
-                                style = {{
-                                    width: 12, 
-                                    height: 12, 
-                                    borderRadius: 6, 
-                                    backgroundColor: "darkred",
-                                }}
-                                />
-                            )}
-                        </View>
-                        <Text
-                        style ={{
-                            fontFamily: "DidactGothic_400Regular", 
-                            fontSize: 16, 
-                            color: "#000", 
-                        }}
-                        >
-                            {option}
-                        </Text>
-                    </Pressable>
-                    ))}
-                    
-                </View>
-                 <View style ={{marginTop: 20}}>
-                    <Text
-                    style={{
-                        fontFamily: "DidactGothic_400Regular",
-                        fontSize: 18, 
-                        color: "#black",
-                        marginBottom: 20,
-                    }}
-                    >
-                        Are you comfortable with pills?
-                    </Text>
-                    {["Yes","No"].map((option) =>(
-                        <Pressable
-                        key={option}
-                        onPress={() => setPills(option)}
-                        style= {{
-                            flexDirection: "row",
-                            alignItems: "center", 
-                            marginBottom: 8, 
-                        }}
-                    >
-                        <View
-                        style = {{
-                            width: 20,
-                                height: 20,
-                                borderRadius: 10,
-                                borderWidth: 1,
-                                borderColor: "#000",
-                                marginRight: 10,
-                                justifyContent: "center",
-                                alignItems: "center",
-                        }}
-                        >
-                            {pills === option && (
-                                <View
-                                style = {{
-                                    width: 12, 
-                                    height: 12, 
-                                    borderRadius: 6, 
-                                    backgroundColor: "darkred",
-                                }}
-                                />
-                            )}
-                        </View>
-                        <Text
-                        style ={{
-                            fontFamily: "DidactGothic_400Regular", 
-                            fontSize: 16, 
-                            color: "#000", 
-                        }}
-                        >
-                            {option}
-                        </Text>
-                    </Pressable>
-                    ))}
-                    
-                </View>
-                {error ? (
-                    <Text style={{
-                        color: "red",
-                        fontSize: 16,
-                        fontFamily: "DidactGothic_400Regular",
-                        textAlign: "center",
-                        marginTop: 15,
-                        marginBottom: 10,
-                    }}>
-                        {error}
-                    </Text>
-                ) : null}
-                <Pressable
-                              onPress={validate} 
-                              style={{
-                                backgroundColor: "#bc7272ff", 
-                                paddingVertical: 4,
-                                paddingHorizontal: 30,
-                                borderRadius: 25,
-                                borderWidth: 1,
-                                borderColor: "darkred",
-                                justifyContent: "center",
-                                marginTop: 0,
-                                alignSelf: "flex-end",
-                                marginRight: 30,       
-                                shadowColor: "#4e0e0eff",        
-                          shadowOffset: { width: 8, height: 15 }, 
-                          shadowOpacity: 0.4,         
-                          shadowRadius: 8,  
-                              }}
-                            >
-                              <Text
-                                style={{
-                                  color: "white",
-                                  fontSize: 18,
-                                  fontFamily: "DidactGothic_400Regular",
-                                  textAlign: "center",
-                                }}
-                              >
-                                Complete Profile
-                              </Text>
-                            </Pressable>
-                      
+  const renderStep5_Done = () => (
+    <View style={styles.centerContent}>
+      <View style={styles.headerBlock}>
+        <Text style={styles.stepTitle}>Done!</Text>
+        <ProgressBar progress={100} />
+      </View>
       
-      </ScrollView>
-   
-      
-      
-    );
+      <View style={styles.successContainer}>
+         <Image source={require('../assets/images/medguide.png')} style={styles.logoLarge} resizeMode="contain"/>
+         <Text style={styles.completeText}>Your Profile is Complete.</Text>
+         
+         <TouchableOpacity 
+            style={[styles.finishButton, isSubmitting && styles.finishButtonDisabled]} 
+            onPress={handleNext}
+            activeOpacity={0.8}
+            disabled={isSubmitting}
+         >
+           {isSubmitting ? (
+             <ActivityIndicator color="#1A1A1A" />
+           ) : (
+             <>
+               <Text style={styles.finishButtonText}>Go to Home</Text>
+               <Ionicons name="arrow-forward" size={18} color="#1A1A1A" />
+             </>
+           )}
+         </TouchableOpacity>
+      </View>
+    </View>
+  );
 
+  // --- MAIN RENDER ---
+  if (step === 0) return renderStep0_Welcome();
+
+  return (
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+      
+      <View style={styles.contentArea}>
+        {step === 1 && renderStep1_Physical()}
+        {step === 2 && renderStep2_Sex()}
+        {step === 3 && renderStep3_Stress()}
+        {step === 4 && renderStep4_Details()}
+        {step === 5 && renderStep5_Done()}
+      </View>
+
+      {step > 0 && step < 5 && (
+        <View style={styles.footer}>
+          
+          <View style={{ width: 50 }}> 
+            {step > 1 && (
+              <TouchableOpacity onPress={handleBack} style={styles.iconBtn} activeOpacity={0.7}>
+                <Ionicons name="arrow-back" size={24} color="#333" />
+              </TouchableOpacity>
+            )}
+          </View>
+          
+          {step === 4 ? (
+            <TouchableOpacity onPress={() => {
+               if (validateStep(4)) setStep(5);
+            }} style={styles.doneBtn} activeOpacity={0.8}>
+              <Text style={styles.doneBtnText}>Finish</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity onPress={handleNext} style={styles.iconBtn} activeOpacity={0.7}>
+               <Ionicons name="arrow-forward" size={24} color="#333" />
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
+    </KeyboardAvoidingView>
+  );
 }
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  contentArea: {
+    flex: 1,
+  },
+  fullScreenContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: 24,
+  },
+  welcomeCard: {
+    backgroundColor: '#fff',
+    borderRadius: 32,
+    paddingVertical: 40,
+    paddingHorizontal: 32,
+    alignItems: 'center',
+    shadowColor: '#FFB3D1',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.3,
+    shadowRadius: 24,
+    elevation: 12,
+  },
+  logo: {
+    width: 80,
+    height: 80,
+    marginBottom: 24,
+  },
+  welcomeTitle: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#1A1A1A',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  welcomeDesc: {
+    textAlign: 'center',
+    color: '#666',
+    fontSize: 16,
+    marginBottom: 32,
+    lineHeight: 24,
+  },
+  startButton: {
+    backgroundColor: '#FFB3D1',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    borderRadius: 24,
+    gap: 8,
+    width: '100%',
+  },
+  startButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1A1A1A',
+  },
+  stepContent: {
+    flex: 1,
+    paddingHorizontal: 32,
+    paddingTop: 80, 
+  },
+  stepContentScroll: {
+    flex: 1,
+    paddingHorizontal: 32,
+    paddingTop: 80,
+  },
+  headerBlock: {
+    marginBottom: 32,
+  },
+  stepTitle: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: '#1A1A1A',
+    marginBottom: 4,
+  },
+  stepSubtitle: {
+    fontSize: 16,
+    color: '#888',
+    fontWeight: '500',
+    marginBottom: 4,
+  },
+  progressContainer: {
+    height: 6,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 3,
+    marginTop: 12,
+    width: '100%',
+    overflow: 'hidden',
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: '#FFB3D1',
+    borderRadius: 3,
+  },
+  formGroup: {
+    flex: 1,
+  },
+  centerForm: {
+    alignItems: 'flex-start',
+  },
+  questionLabel: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 16,
+  },
+  fixedWidthInput: {
+    width: 140,
+    backgroundColor: '#F9F9F9',
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  cleanInput: {
+    flex: 1,
+    backgroundColor: '#F9F9F9',
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1A1A1A',
+    textAlign: 'center',
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  unitBadge: {
+    backgroundColor: '#FFB3D1',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 16,
+    justifyContent: 'center',
+  },
+  unitText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1A1A1A',
+  },
+  spacerLarge: {
+    height: 40,
+  },
+  selectRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 24,
+  },
+  selectBtn: {
+    flex: 1,
+    backgroundColor: '#FFF',
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  selectBtnActive: {
+    backgroundColor: '#FFB3D1',
+    borderColor: '#FFB3D1',
+    shadowColor: '#FFB3D1',
+    shadowOpacity: 0.4,
+  },
+  selectBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#666',
+  },
+  selectBtnTextActive: {
+    color: '#1A1A1A',
+    fontWeight: '700',
+  },
+  cleanTextInput: {
+    backgroundColor: '#F9F9F9',
+    borderRadius: 14,
+    padding: 16,
+    fontSize: 16,
+    color: '#1A1A1A',
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+    flex: 1,
+  },
+  subLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 10,
+    color: '#666',
+  },
+  fadeContainer: {
+    marginTop: 24,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#F0F0F0',
+    marginVertical: 32,
+  },
+  dividerSmall: {
+    height: 1,
+    backgroundColor: '#F0F0F0',
+    marginVertical: 24,
+  },
+  questionLabelSmall: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1A1A1A',
+    marginBottom: 16,
+  },
+  questionLabelInline: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1A1A1A',
+    flex: 1, // Allows text to wrap nicely if needed
+  },
+  questionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 16,
+  },
+  radioGroup: {
+    gap: 16,
+  },
+  radioGroupHorizontal: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  radioRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  radioCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#E0E0E0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFF',
+  },
+  radioCircleActive: {
+    borderColor: '#FFB3D1',
+    backgroundColor: '#FFF',
+  },
+  radioDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#FFB3D1',
+  },
+  radioText: {
+    fontSize: 16,
+    color: '#888',
+    fontWeight: '500',
+  },
+  radioTextActive: {
+    color: '#1A1A1A',
+    fontWeight: '600',
+  },
+  stressContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 24,
+  },
+  stressDot: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#F0F0F0',
+  },
+  stressDotActive: {
+    transform: [{ scale: 1.3 }], 
+  },
+  stressFeedback: {
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 22,
+    fontWeight: '800',
+   
+  },
+
+  sectionHeader: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 16,
+  },
+  inputWithLabel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  inputLabelPrefix: {
+    width: 32,
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#999',
+  },
+  cleanTextArea: {
+    backgroundColor: '#F9F9F9',
+    borderRadius: 14,
+    padding: 16,
+    fontSize: 16,
+    color: '#1A1A1A',
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+    height: 120,
+    textAlignVertical: 'top',
+  },
+
+  centerContent: {
+    flex: 1,
+    paddingHorizontal: 32,
+    paddingTop: 80,
+  },
+  successContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: -80, 
+  },
+  logoLarge: {
+    width: 140,
+    height: 140,
+    marginBottom: 32,
+  },
+  completeText: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#1A1A1A',
+    marginBottom: 40,
+    textAlign: 'center',
+  },
+  finishButton: {
+    backgroundColor: '#FFB3D1',
+    paddingVertical: 18,
+    paddingHorizontal: 48,
+    borderRadius: 32,
+    shadowColor: '#FFB3D1',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  finishButtonDisabled: {
+    opacity: 0.7,
+  },
+  finishButtonText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1A1A1A',
+  },
+
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+    paddingBottom: 48, 
+    paddingTop: 24,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#FAFAFA',
+  },
+  iconBtn: {
+    padding: 16,
+    borderRadius: 50,
+    backgroundColor: '#F9F9F9',
+  },
+  doneBtn: {
+    backgroundColor: '#FFB3D1', 
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: 24,
+    shadowColor: '#FFB3D1',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  doneBtnText: {
+    color: '#1A1A1A', 
+    fontWeight: '700',
+    fontSize: 16,
+  },
+
+});

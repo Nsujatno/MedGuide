@@ -16,7 +16,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
 
   const handleLogin = () => {
-    router.replace('/profile-dashboard/home');
+    router.replace('/createpro');
   };
 
   return (
