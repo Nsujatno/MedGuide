@@ -1,382 +1,303 @@
-import React, {useState} from "react"; 
-import {useRouter} from "expo-router"; 
-import { View, Text, TextInput, Button, Platform,Pressable } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker"; 
-import { useFonts, DidactGothic_400Regular } from "@expo-google-fonts/didact-gothic";
-export default function SignUp() {
-    const router = useRouter(); 
-    const [date, setDate] = useState(new Date());
-    const [showPicker, setShowPicker] = useState(false);
-    const [firstName, setFirstName] = useState(""); 
-    const [lastName, setLastName] = useState(""); 
-    const [email, setEmail] = useState(""); 
-    const [password, setPassword] = useState(""); 
-    const [phone, setPhone] = useState(""); 
-    const [error, setError] = useState(""); 
+import React, { useState } from 'react';
+import { 
+  View, 
+  Text, 
+  TextInput, 
+  TouchableOpacity, 
+  StyleSheet, 
+  Image, 
+  Switch,
+  KeyboardAvoidingView,
+  Platform,
+  Dimensions,
+  Alert
+} from 'react-native';
+import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
-    const [fontsLoaded] = useFonts({
-  DidactGothic_400Regular,
-});
-    if (!fontsLoaded) return null;
+const { height } = Dimensions.get('window');
 
-    const onChange = (event, selectedDate) => {
-    const currentDate = selectedDate || date;
-    setShowPicker(Platform.OS === "ios");
-    setDate(currentDate);
+export default function SignUpScreen() {
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+    allowNotifs: false
+  });
+
+  const updateField = (key: string, value: string | boolean) => {
+    setFormData(prev => ({ ...prev, [key]: value }));
   };
-  
-  const validate = () => {
-    if (!firstName.trim() || !lastName.trim() || !email.trim() || !password.trim() || !phone.trim()){
-        setError("Please fill all fields"); 
-        return; 
+
+  const handleRegister = () => {
+    if (!formData.email || !formData.password || !formData.firstName) {
+      Alert.alert("Missing Fields", "Please fill in all required fields.");
+      return;
     }
-    const firstNameLetter = firstName.trim().charAt(0).toUpperCase(); 
-    setError(""); 
-    router.push({
-        pathname: "/created",
-        params: { firstNameLetter},
-    });
-  }
+    if (formData.password !== formData.confirmPassword) {
+      Alert.alert("Error", "Passwords do not match.");
+      return;
+    }
+    console.log("Registering User:", formData);
+    router.push('/success');
+  };
 
   return (
-    <View style={{
-
-        flex: 1,
-        justifyContent: "flex-start",
-        alignItems: "center",
-        backgroundColor: "rgba(237, 172, 180, 1)",
-        paddingTop: 40,
-      }}
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
     >
-    <View
-            style={{
-             
-              marginBottom: 20,
-              
-              
-              elevation: 5, 
-            }}
-          >
-            <Text
-              style={{
-                color: "#530c0cff",
-                fontFamily: "DidactGothic_400Regular",
-    
-                fontSize: 40,
-                fontWeight: "900",
-              }}
-            >
-              Create an Account
-            </Text>
+      <View style={styles.contentContainer}>
+        
+        <View style={styles.header}>
+          <View style={styles.logoContainer}>
+            <View style={styles.brandBadge}>
+              <Text style={styles.brandText}>Medguide</Text>
+            </View>
+            <Image 
+              source={require('../assets/images/medguide.png')} 
+              style={styles.peekingLogo} 
+            />
+          </View>
         </View>
-    <View
-        style={{
-          backgroundColor: "#c86e6eff", 
-          width: "85%",
-          borderRadius: 20,
-          padding: 10,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.2,
-          shadowRadius: 4,
-          marginBottom: 20,
-          elevation: 3,
-        }}
-      >
-        <Text
-          style={{
-            fontFamily: "DidactGothic_400Regular",
-            fontSize: 16,
-            color: "#430b0bff",
-            marginBottom: 8,
-          }}
-        >
-          First Name
-        </Text>
 
-        <TextInput
-          placeholder="Enter your first name"
-          placeholderTextColor="#b38686ff"
-          value = {firstName}
-          onChangeText={setFirstName}
-          style={{
-            backgroundColor: "white",
-            borderRadius: 10,
-            paddingVertical: 5,
-            paddingHorizontal: 15,
-            fontSize: 16,
-            color: "#8B0000",
-            borderWidth: 1,
-            borderColor: "#8B0000",
-          }}
-        />
-      </View>
-    
-    <View
-        style={{
-          backgroundColor: "#c86e6eff", 
-          width: "85%",
-          borderRadius: 20,
-          padding: 10,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.2,
-          shadowRadius: 4,
-          marginBottom: 20,
-          elevation: 4,
-        }}
-      >
-        <Text
-          style={{
-            fontFamily: "DidactGothic_400Regular",
-            fontSize: 16,
-            color: "#430b0bff",
-            marginBottom: 8,
-          }}
-        >
-          Last Name
-        </Text>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Create Account</Text>
 
-        <TextInput
-          placeholder="Enter your last name"
-          placeholderTextColor="#b38686ff"
-          value={lastName}
-          onChangeText={setLastName}
-          style={{
-            backgroundColor: "white",
-            borderRadius: 10,
-            paddingVertical: 5,
-            paddingHorizontal: 15,
-            fontSize: 16,
-            color: "#8B0000",
-            borderWidth: 1,
-            borderColor: "#8B0000",
-          }}
-        />
-      </View>
-      <View
-        style={{
-          backgroundColor: "#c86e6eff", 
-          width: "85%",
-          borderRadius: 20,
-          padding: 10,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.2,
-          shadowRadius: 4,
-          marginBottom: 20,
-          elevation: 3,
-        }}
-      >
-        <Text
-          style={{
-            fontFamily: "DidactGothic_400Regular",
-            fontSize: 16,
-            color: "#430b0bff",
-            marginBottom: 8,
-          }}
-        >
-          Email
-        </Text>
-
-        <TextInput
-          placeholder="Enter your email"
-          placeholderTextColor="#b38686ff"
-          value = {email}
-          onChangeText={setEmail}
-          style={{
-            backgroundColor: "white",
-            borderRadius: 10,
-            paddingVertical: 5,
-            paddingHorizontal: 15,
-            fontSize: 16,
-            color: "#8B0000",
-            borderWidth: 1,
-            borderColor: "#8B0000",
-          }}
-        />
-      </View>
-      <View
-        style={{
-          backgroundColor: "#c86e6eff", 
-          width: "85%",
-          borderRadius: 20,
-          padding: 10,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.2,
-          shadowRadius: 4,
-          marginBottom: 20,
-          elevation: 3,
-        }}
-      >
-        <Text
-          style={{
-            fontFamily: "DidactGothic_400Regular",
-            fontSize: 16,
-            color: "#430b0bff",
-            marginBottom: 8,
-          }}
-        >
-          Password
-        </Text>
-
-        <TextInput
-          placeholder="Create a password"
-          placeholderTextColor="#b38686ff"
-          value={password}
-          onChangeText = {setPassword}
-          style={{
-            backgroundColor: "white",
-            borderRadius: 10,
-            paddingVertical: 5,
-            paddingHorizontal: 15,
-            fontSize: 16,
-            color: "#8B0000",
-            borderWidth: 1,
-            borderColor: "#8B0000",
-          }}
-        />
-      </View>
-      <View
-        style={{
-          backgroundColor: "#c86e6eff", 
-          width: "85%",
-          borderRadius: 20,
-          padding: 10,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.2,
-          shadowRadius: 4,
-          marginBottom: 20,
-          elevation: 3,
-        }}
-      >
-        <Text
-          style={{
-            fontFamily: "DidactGothic_400Regular",
-            fontSize: 16,
-            color: "#430b0bff",
-            marginBottom: 8,
-          }}
-        >
-          Phone Number
-        </Text>
-
-        <TextInput
-          placeholder="Enter your phone number"
-          placeholderTextColor="#b38686ff"
-          value={phone}
-          onChangeText = {setPhone}
-          style={{
-            backgroundColor: "white",
-            borderRadius: 10,
-            paddingVertical: 5,
-            paddingHorizontal: 15,
-            fontSize: 16,
-            color: "#8B0000",
-            borderWidth: 1,
-            borderColor: "#8B0000",
-          }}
-        />
-      </View>
-      <View
-        style={{
-          backgroundColor: "#FFFFFF", 
-          width: 340,
-          height: 100,
-          borderRadius: 28,
-          borderWidth: 4,
-          borderColor: "darkred",
-          justifyContent: "center",
-          alignItems: "center",
-          marginBottom: 5,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.2,
-          shadowRadius: 4,
-          elevation: 3,
-        }}
-      >
-        <Text
-          style={{
-            fontFamily: "DidactGothic_400Regular",
-            fontSize: 20,
-            color: "#560c0cff",
+          <View style={styles.inputContainer}>
             
-            marginTop: 0,
-          }}
-        >
-          Date of Birth
-        </Text>
+            <View style={styles.inputWrapper}>
+              <Ionicons name="person-outline" size={18} color="#999" style={styles.inputIcon} />
+              <TextInput 
+                style={styles.input} 
+                placeholder="First Name" 
+                placeholderTextColor="#A0A0A0"
+                value={formData.firstName}
+                onChangeText={(t) => updateField('firstName', t)}
+              />
+            </View>
 
-        <Button
-          title={date.toDateString()}
-          color="#c86e6eff"
-          onPress={() => setShowPicker(true)}
-        />
+            <View style={styles.inputWrapper}>
+              <Ionicons name="person-outline" size={18} color="#999" style={styles.inputIcon} />
+              <TextInput 
+                style={styles.input} 
+                placeholder="Last Name" 
+                placeholderTextColor="#A0A0A0"
+                value={formData.lastName}
+                onChangeText={(t) => updateField('lastName', t)}
+              />
+            </View>
 
-        {showPicker && (
-          <DateTimePicker
-            value={date}
-            mode="date"
-            display="default"
-            onChange={onChange}
-          />
-        )}
+            <View style={styles.inputWrapper}>
+              <Ionicons name="mail-outline" size={18} color="#999" style={styles.inputIcon} />
+              <TextInput 
+                style={styles.input} 
+                placeholder="Email Address" 
+                placeholderTextColor="#A0A0A0"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={formData.email}
+                onChangeText={(t) => updateField('email', t)}
+              />
+            </View>
+
+            <View style={styles.inputWrapper}>
+              <Ionicons name="call-outline" size={18} color="#999" style={styles.inputIcon} />
+              <TextInput 
+                style={styles.input} 
+                placeholder="Phone Number" 
+                placeholderTextColor="#A0A0A0"
+                keyboardType="phone-pad"
+                value={formData.phone}
+                onChangeText={(t) => updateField('phone', t)}
+              />
+            </View>
+
+            <View style={styles.inputWrapper}>
+              <Ionicons name="lock-closed-outline" size={18} color="#999" style={styles.inputIcon} />
+              <TextInput 
+                style={styles.input} 
+                placeholder="Password" 
+                placeholderTextColor="#A0A0A0"
+                secureTextEntry
+                value={formData.password}
+                onChangeText={(t) => updateField('password', t)}
+              />
+            </View>
+
+            <View style={styles.inputWrapper}>
+              <Ionicons name="lock-closed-outline" size={18} color="#999" style={styles.inputIcon} />
+              <TextInput 
+                style={styles.input} 
+                placeholder="Confirm Password" 
+                placeholderTextColor="#A0A0A0"
+                secureTextEntry
+                value={formData.confirmPassword}
+                onChangeText={(t) => updateField('confirmPassword', t)}
+              />
+            </View>
+          </View>
+
+          <View style={styles.switchRow}>
+            <Switch 
+              trackColor={{ false: "#E0E0E0", true: "#FFB3D1" }}
+              thumbColor="#FFFFFF"
+              onValueChange={(v) => updateField('allowNotifs', v)}
+              value={formData.allowNotifs}
+              style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }} 
+            />
+            <Text style={styles.switchText}>Allow Notifications</Text>
+          </View>
+
+          <TouchableOpacity style={styles.registerBtn} onPress={handleRegister}>
+            <Text style={styles.registerText}>Register</Text>
+          </TouchableOpacity>
+
+          <View style={styles.footerRow}>
+            <Text style={styles.footerText}>Have an account? </Text>
+            <TouchableOpacity onPress={() => router.back()}>
+              <Text style={styles.linkText}>Log in</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
       </View>
-        {error ? (
-        <Text
-            style ={{
-                color: "red",
-                fontFamily: "DidactGothic_400Regular",
-                marginBottom: 0,
-            }}
-        >
-            {error}
-        </Text>
-  )    : null}
-        
-        
-       
-      <Pressable
-              onPress={validate} 
-              style={{
-                backgroundColor: "#e8a3a3ff", 
-                paddingVertical: 8,
-                paddingHorizontal: 30,
-                borderRadius: 25,
-                borderWidth: 1,
-                borderColor: "darkred",
-                justifyContent: "center",
-                marginTop: 0,
-                alignSelf: "flex-end",
-                marginRight: 30,       
-                shadowColor: "#4e0e0eff",        
-          shadowOffset: { width: 8, height: 15 }, 
-          shadowOpacity: 0.4,         
-          shadowRadius: 8,  
-              }}
-            >
-              <Text
-                style={{
-                  color: "darkred",
-                  fontSize: 18,
-                  fontFamily: "DidactGothic_400Regular",
-                  textAlign: "center",
-                }}
-              >
-                Next
-              </Text>
-            </Pressable>
-    </View>
-      
-        
-       
-
-    
-    
+    </KeyboardAvoidingView>
   );
 }
 
-
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F8F9FA',
+  },
+  contentContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: height < 700 ? 15 : 25,
+    zIndex: 10,
+  },
+  logoContainer: {
+    position: 'relative', 
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  brandBadge: {
+    backgroundColor: '#FFB3D1', 
+    paddingHorizontal: 28,
+    paddingVertical: 10,
+    borderRadius: 30,
+    shadowColor: '#FFB3D1',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  brandText: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#1A1A1A',
+    letterSpacing: 0.5,
+  },
+  peekingLogo: {
+    width: 46,
+    height: 46,
+    resizeMode: 'contain',
+    position: 'absolute',
+    top: -24, 
+    right: -14,
+    zIndex: 20, 
+    transform: [{ rotate: '12deg' }] 
+  },
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    paddingVertical: 24,
+    paddingHorizontal: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.05,
+    shadowRadius: 20,
+    elevation: 3,
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  inputContainer: {
+    gap: 10, 
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F9F9F9',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+    height: 44, 
+    paddingHorizontal: 12,
+  },
+  inputIcon: {
+    marginRight: 10,
+  },
+  input: {
+    flex: 1,
+    fontSize: 14,
+    color: '#1A1A1A',
+    height: '100%',
+  },
+  switchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+    marginBottom: 12,
+    gap: 8,
+  },
+  switchText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#666',
+  },
+  registerBtn: {
+    backgroundColor: '#FFB3D1',
+    paddingVertical: 14, 
+    borderRadius: 12, 
+    alignItems: 'center',
+    marginBottom: 12,
+    shadowColor: '#FFB3D1',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  registerText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1A1A1A',
+  },
+  footerRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  footerText: {
+    color: '#888',
+    fontSize: 13,
+  },
+  linkText: {
+    fontWeight: '700',
+    fontSize: 13,
+    color: '#1A1A1A',
+  },
+});

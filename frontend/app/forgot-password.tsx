@@ -7,16 +7,25 @@ import {
   StyleSheet, 
   Image, 
   KeyboardAvoidingView, 
-  Platform 
+  Platform,
+  Alert
 } from 'react-native';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
-export default function LoginScreen() {
+export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    router.replace('/profile-dashboard/home');
+  const handleResetPassword = () => {
+    if (!email) {
+      Alert.alert("Error", "Please enter your email address.");
+      return;
+    }
+    Alert.alert(
+      "Check your email", 
+      "We've sent a password reset link to your email address.",
+      [{ text: "OK", onPress: () => router.back() }]
+    );
   };
 
   return (
@@ -31,7 +40,6 @@ export default function LoginScreen() {
             <View style={styles.brandBadge}>
               <Text style={styles.brandText}>Medguide</Text>
             </View>
-            
             <Image 
               source={require('../assets/images/medguide.png')} 
               style={styles.peekingLogo} 
@@ -40,45 +48,35 @@ export default function LoginScreen() {
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Login to your account</Text>
+          <Text style={styles.cardTitle}>Reset Password</Text>
+          
+          <Text style={styles.instructions}>
+            Enter the email associated with your account and we'll send you a link to reset your password.
+          </Text>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              placeholder="name@example.com"
+          <View style={styles.inputWrapper}>
+            <Ionicons name="mail-outline" size={18} color="#999" style={styles.inputIcon} />
+            <TextInput 
+              style={styles.input} 
+              placeholder="Email Address" 
               placeholderTextColor="#A0A0A0"
               keyboardType="email-address"
               autoCapitalize="none"
+              value={email}
+              onChangeText={setEmail}
             />
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Password</Text>
-            <TextInput
-              style={styles.input}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              placeholder="••••••••"
-              placeholderTextColor="#A0A0A0"
-            />
-          </View>
+          <View style={{ height: 20 }} />
 
-          <TouchableOpacity style={styles.forgotBtn} onPress={() => router.push('/forgot-password')}>
-            <Text style={styles.forgotText}>Forgot Password?</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.signInBtn} onPress={handleLogin}>
-            <Text style={styles.signInText}>Sign In</Text>
+          <TouchableOpacity style={styles.resetBtn} onPress={handleResetPassword}>
+            <Text style={styles.resetText}>Send Reset Link</Text>
           </TouchableOpacity>
 
           <View style={styles.footerRow}>
-            <Text style={styles.footerText}>Don't have an Account? </Text>
-            <TouchableOpacity onPress={() => router.push('/signUp')}>
-              <Text style={styles.linkText}>Create Account</Text>
+            <TouchableOpacity onPress={() => router.back()} style={styles.backLink}>
+              <Ionicons name="arrow-back" size={16} color="#666" style={{ marginRight: 5 }} />
+              <Text style={styles.linkText}>Back to Login</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -91,7 +89,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F8F9FA',
   },
   contentContainer: {
     flex: 1,
@@ -100,8 +98,8 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
-    zIndex: 10, 
+    marginBottom: 30,
+    zIndex: 10,
   },
   logoContainer: {
     position: 'relative', 
@@ -110,8 +108,8 @@ const styles = StyleSheet.create({
   },
   brandBadge: {
     backgroundColor: '#FFB3D1', 
-    paddingHorizontal: 32,
-    paddingVertical: 12,
+    paddingHorizontal: 28,
+    paddingVertical: 10,
     borderRadius: 30,
     shadowColor: '#FFB3D1',
     shadowOffset: { width: 0, height: 4 },
@@ -120,17 +118,17 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   brandText: {
-    fontSize: 26,
+    fontSize: 22,
     fontWeight: '800',
     color: '#1A1A1A',
     letterSpacing: 0.5,
   },
   peekingLogo: {
-    width: 54,
-    height: 54,
+    width: 46,
+    height: 46,
     resizeMode: 'contain',
     position: 'absolute',
-    top: -28, 
+    top: -24, 
     right: -14,
     zIndex: 20, 
     transform: [{ rotate: '12deg' }] 
@@ -138,65 +136,60 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
-    paddingVertical: 32,
+    paddingVertical: 30,
     paddingHorizontal: 24,
-    
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.08,
-    shadowRadius: 24,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: '#F5F5F5',
+    shadowOpacity: 0.05,
+    shadowRadius: 20,
+    elevation: 3,
   },
   cardTitle: {
     fontSize: 20,
     fontWeight: '700',
     color: '#1A1A1A',
     textAlign: 'center',
-    marginBottom: 32,
+    marginBottom: 12,
   },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  label: {
+  instructions: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#4A4A4A',
-    marginBottom: 8,
-    marginLeft: 4,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 20,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F9F9F9',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+    height: 48,
+    paddingHorizontal: 12,
+  },
+  inputIcon: {
+    marginRight: 10,
   },
   input: {
-    backgroundColor: '#F9F9F9',
-    borderRadius: 16,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    fontSize: 16,
+    flex: 1,
+    fontSize: 15,
     color: '#1A1A1A',
+    height: '100%',
   },
-  forgotBtn: {
-    alignSelf: 'flex-end',
-    marginBottom: 24,
-    marginTop: -8,
-  },
-  forgotText: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: '#666',
-  },
-  signInBtn: {
+  resetBtn: {
     backgroundColor: '#FFB3D1',
-    paddingVertical: 18,
-    borderRadius: 16,
+    paddingVertical: 14,
+    borderRadius: 12,
     alignItems: 'center',
     marginBottom: 20,
     shadowColor: '#FFB3D1',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
   },
-  signInText: {
+  resetText: {
     fontSize: 16,
     fontWeight: '700',
     color: '#1A1A1A',
@@ -206,13 +199,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  footerText: {
-    color: '#888',
-    fontSize: 14,
+  backLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
   },
   linkText: {
-    fontWeight: '700',
+    fontWeight: '600',
     fontSize: 14,
-    color: '#1A1A1A',
+    color: '#666',
   },
 });

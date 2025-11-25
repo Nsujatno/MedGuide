@@ -1,134 +1,74 @@
-import { Redirect } from 'expo-router';
+import React, { useEffect } from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { router } from 'expo-router';
 
-export default function Index() {
-  return <Redirect href="/profile-dashboard/home" />;
+export default function StartScreen() {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      router.push('/login');
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <TouchableOpacity 
+      style={styles.container} 
+      activeOpacity={0.9}
+      onPress={() => router.push('/login')}
+    >
+      <View style={styles.content}>
+        <Image 
+          source={require('../assets/images/medguide.png')} 
+          style={styles.logo}
+          resizeMode="contain"
+        />
+        <Text style={styles.welcomeText}>Welcome to</Text>
+        <View style={styles.brandBadge}>
+          <Text style={styles.brandText}>Medguide</Text>
+        </View>
+        <Text style={styles.tagline}>Your smart guide</Text>
+      </View>
+    </TouchableOpacity>
+  );
 }
 
-// import { Text, View, Image, Pressable } from "react-native";
-// import { useFonts, JosefinSans_400Regular } from "@expo-google-fonts/josefin-sans";
-// import {useRouter} from "expo-router"; 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  content: {
+    alignItems: 'center',
+  },
+  logo: {
+    width: 100,
+    height: 100,
+    marginBottom: 20,
+  },
+  welcomeText: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#000',
+    marginBottom: 10,
+  },
+  brandBadge: {
+    backgroundColor: '#FFB3D1', 
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    marginBottom: 10,
+  },
+  brandText: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#000',
+  },
+  tagline: {
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '600',
+  },
+});
 
-
-
-// export default function Index() {
-//   const router = useRouter(); 
-//   const [fontsLoaded] = useFonts({
-//     JosefinSans_400Regular,
-//   });
-
-//   if (!fontsLoaded) {
-//     return null; 
-//   }
-
-//   return (
-//     <View
-//       style={{
-//         flex: 1,
-//         justifyContent: "flex-start",
-//         alignItems: "center",
-//         backgroundColor: "#EAB2B2",
-//         paddingTop: 80,
-//       }}
-//     >
-     
-//       <Text
-//         style={{
-//           fontFamily: "JosefinSans_400Regular",
-//           fontSize: 40,
-//           textAlign: "center",
-//           color: "#8B0000",
-//           marginTop: 20,
-//         }}
-//       >
-//         Welcome To{"\n"}MedGuide
-//       </Text>
-
-    
-//       <Text
-//         style={{
-//           fontFamily: "JosefinSans_400Regular",
-//           fontSize: 20,
-//           color: "#FFFFFF",
-//           textAlign: "center",
-//           marginTop: 10,
-//           marginBottom: 250,
-//         }}
-//       >
-//         Your Smart Guide
-//       </Text>
-
-     
-//       <Image
-//         source={require("../assets/images/medguide.png")}
-//         style={{
-//           position: "absolute", 
-//           width: 223,
-//           height: 223,
-//           top: 220, 
-//           left: 100, 
-//         }}
-//       />
-
-      
-//       <Text
-//         style={{
-//           fontFamily: "JosefinSans_400Regular",
-//           fontSize: 15,
-//           color: "#FFFFFF",
-//           textAlign: "center",
-//           lineHeight: 20,
-//           maxWidth: 300,
-//           marginHorizontal: "auto",
-//           marginBottom: 30,
-//         }}
-//       >
-//         Explore our custom-trained AI model employing data-driven recommendations
-//         for over-the-counter medication.
-//       </Text>
-
-    
-//       <Pressable
-//         onPress={() => router.push('/login')} 
-//         style={{
-//           backgroundColor: "#8B0000", 
-//           paddingVertical: 12,
-//           paddingHorizontal: 90,
-//           borderRadius: 25,
-//           marginTop: 0,
-//         }}
-//       >
-//         <Text
-//           style={{
-//             color: "white",
-//             fontSize: 18,
-//             fontFamily: "JosefinSans_400Regular",
-//             textAlign: "center",
-//           }}
-//         >
-//           Log In
-//         </Text>
-//       </Pressable>
-//       <Pressable
-//         onPress={() => router.push('/signUp')} 
-//         style={{
-//           backgroundColor: "#b15454ff", 
-//           paddingVertical: 12,
-//           paddingHorizontal: 40,
-//           borderRadius: 25,
-//           marginTop: 20,
-//         }}
-//       >
-//         <Text
-//           style={{
-//             color: "white",
-//             fontSize: 18,
-//             fontFamily: "JosefinSans_400Regular",
-//             textAlign: "center",
-//           }}
-//         >
-//           Create an Account
-//         </Text>
-//       </Pressable>
-//     </View>
-//   );
-// }
