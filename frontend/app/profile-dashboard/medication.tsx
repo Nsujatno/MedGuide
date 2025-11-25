@@ -16,7 +16,7 @@ export default function MedicationScreen() {
   const handleSettings = () => {
     setShowMenu(false);
     console.log('Opening settings...');
-    // router.push('/settings');
+    router.push('/settings');
   };
 
   return (

@@ -85,6 +85,7 @@ export default function HomeScreen() {
 
   const handleSettings = () => {
     setShowMenu(false);
+    router.push('/settings');
   };
 
   return (
