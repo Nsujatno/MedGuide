@@ -120,7 +120,7 @@ export default function FollowUpSurvey() {
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep < 5 && !validateCurrentStep()) {
       return;
     }
@@ -128,8 +128,27 @@ export default function FollowUpSurvey() {
     if (currentStep < totalSteps - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      console.log('Follow-up survey completed:', answers);
-      router.replace('/profile-dashboard/home');
+      console.log('Submitting follow-up:', answers);
+      
+      try {
+        const baseUrl = 'http://localhost:3000'; 
+        
+        const response = await fetch(`${baseUrl}/api/followup/create`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(answers),
+        });
+
+        if (response.ok) {
+          router.replace('/profile-dashboard/home');
+        } else {
+          const errorData = await response.json();
+          Alert.alert('Error', errorData.message || 'Failed to save follow-up');
+        }
+      } catch (error) {
+        console.error(error);
+        Alert.alert('Error', 'Connection failed. Check server.');
+      }
     }
   };
 
@@ -676,7 +695,7 @@ export default function FollowUpSurvey() {
         <View style={styles.completionButtonContainer}>
           <TouchableOpacity 
             style={styles.doneButton}
-            onPress={() => router.replace('/profile-dashboard/home')}
+            onPress={handleNext}
             activeOpacity={0.8}
           >
             <Text style={styles.doneButtonText}>Done!</Text>
