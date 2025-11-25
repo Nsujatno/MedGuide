@@ -2,61 +2,78 @@ const router = require('express').Router();
 const mongoose = require('mongoose');
 
 const surveySchema = new mongoose.Schema({
-    length: { type: Number, required: true },
-    hospitalization: { type: Boolean, required: true },
-    dietchange: { type: Boolean, required: true },
-    healthcondition: { type: [String], required: true },
-    medications: { type: [String], required: true },
-    pain: { type: [String], required: true },
-    nausea: { type: Boolean, required: true },
-    symptomstart: { type: Date, required: true },
-    bodypart: { type: [String], required: true },
-    budget: { type: Number, required: true },
-    fever: { type: Boolean, required: true }
-
+    symptoms: { type: [String], required: true },
+    symptomSeverities: { type: Map, of: Number, default: {} }, 
+    otherSymptoms: { type: String, default: '' },
+    symptomsStartDate: { type: Date, required: true }, 
+    symptomsLocation: { type: String, required: true },
+    overallSeverity: { type: String, required: true },
+    hasPain: { type: Boolean, required: true },
+    painSeverity: { type: Number, default: 0 },
+    painLocation: { type: String, default: '' },
+    healthConditions: { type: [String], default: [] },
+    healthConditionsOther: { type: String, default: '' },
+    currentConditions: { type: [String], default: [] },
+    currentConditionsOther: { type: String, default: '' },
+    dietChanges: { type: Boolean, required: true },
+    medications: { type: String, default: '' },
+    recentHospitalizations: { type: Boolean, required: true },
+    createdAt: { type: Date, default: Date.now }
 });
 
 const Survey = mongoose.model('Survey', surveySchema);
 
 router.post('/create', async (req, res) => {
     try {
-        length = req.body.length;
-        hospitalization = req.body.hospitalization;
-        dietchange = req.body.dietchange;
-        healthcondition = req.body.healthcondition;
-        medications = req.body.medications;
-        pain = req.body.pain;
-        nausea = req.body.nausea;
-        symptomstart = req.body.symptomstart;
-        bodypart = req.body.bodypart;
-        budget = req.body.budget;
-        fever = req.body.fever;
+        const {
+            symptoms,
+            symptomSeverities,
+            otherSymptoms,
+            symptomsStartDate,
+            symptomsLocation,
+            overallSeverity,
+            hasPain,
+            painSeverity,
+            painLocation,
+            healthConditions,
+            healthConditionsOther,
+            currentConditions,
+            currentConditionsOther,
+            dietChanges,
+            medications,
+            recentHospitalizations
+        } = req.body;
 
         const newSurvey = new Survey({
-            length,
-            hospitalization,
-            dietchange,
-            healthcondition,
+            symptoms,
+            symptomSeverities,
+            otherSymptoms,
+            symptomsStartDate,
+            symptomsLocation,
+            overallSeverity,
+            hasPain,
+            painSeverity,
+            painLocation,
+            healthConditions,
+            healthConditionsOther,
+            currentConditions,
+            currentConditionsOther,
+            dietChanges,
             medications,
-            pain,
-            nausea,
-            symptomstart,
-            bodypart,
-            budget,
-            fever
+            recentHospitalizations
         });
 
         await newSurvey.save();
         res.status(201).json({ message: 'Survey created successfully', survey: newSurvey });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        console.error("Error saving survey:", error);
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
-})
+});
 
 router.get('/', async (req, res) => {
     try {
-        const surveys = await Survey.find();
+        const surveys = await Survey.find().sort({ createdAt: -1 });
         res.status(200).json(surveys);
     } catch (error) {
         console.error(error);
