@@ -145,7 +145,7 @@ export default function ProfileSetupScreen() {
 
       console.log('Submitting onboarding data:', payload);
 
-      const response = await fetch(`${API_BASE_URL}/user/onboarding`, {
+      const response = await fetch(`${API_BASE_URL}/api/user/onboarding`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
