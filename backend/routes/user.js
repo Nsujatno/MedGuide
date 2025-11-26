@@ -4,10 +4,14 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const userSchema = new mongoose.Schema({
-    username: {
+    firstName: {  
         type: String,
         required: true,
-        unique: true,
+        trim: true
+    },
+    lastName: {  
+        type: String,
+        required: true,
         trim: true
     },
     email: {
@@ -83,14 +87,12 @@ const authenticateToken = (req, res, next) => {
         next();
     });
 };
-
-// Register new user
 router.post('/register', async (req, res) => {
     try {
-        const { username, email, password } = req.body;
+        const { firstName, lastName, email, password } = req.body;  // CHANGED
 
         // Validate input
-        if (!username || !email || !password) {
+        if (!firstName || !lastName || !email || !password) {  // CHANGED
             return res.status(400).json({ message: 'All fields are required' });
         }
 
@@ -98,10 +100,8 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ message: 'Password must be at least 6 characters' });
         }
 
-        // Check if user already exists
-        const existingUser = await User.findOne({
-            $or: [{ email }, { username }]
-        });
+        // Check if user already exists (only by email now)
+        const existingUser = await User.findOne({ email });
 
         if (existingUser) {
             return res.status(409).json({ message: 'User already exists' });
@@ -113,7 +113,8 @@ router.post('/register', async (req, res) => {
 
         // Create new user
         const newUser = new User({
-            username,
+            firstName,  // CHANGED
+            lastName,   // ADDED
             email,
             password: hashedPassword
         });
@@ -122,7 +123,7 @@ router.post('/register', async (req, res) => {
 
         // Generate JWT token
         const token = jwt.sign(
-            { id: newUser._id, username: newUser.username, email: newUser.email },
+            { id: newUser._id, firstName: newUser.firstName, lastName: newUser.lastName, email: newUser.email },  // CHANGED
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
@@ -133,7 +134,8 @@ router.post('/register', async (req, res) => {
             isOnboardingComplete: false,
             user: {
                 id: newUser._id,
-                username: newUser.username,
+                firstName: newUser.firstName,  
+                lastName: newUser.lastName,     
                 email: newUser.email
             }
         });
@@ -143,36 +145,32 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// Login user
+
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Validate input
         if (!email || !password) {
             return res.status(400).json({ message: 'Email and password are required' });
         }
 
-        // Find user by email
         const user = await User.findOne({ email });
 
         if (!user) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        // Compare password
         const isPasswordValid = await bcrypt.compare(password, user.password);
 
         if (!isPasswordValid) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        // Check if onboarding is complete
         const isOnboardingComplete = !!(user.weight && user.height && user.age);
 
         // Generate JWT token
         const token = jwt.sign(
-            { id: user._id, username: user.username, email: user.email },
+            { id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email },  
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
@@ -183,7 +181,8 @@ router.post('/login', async (req, res) => {
             isOnboardingComplete,
             user: {
                 id: user._id,
-                username: user.username,
+                firstName: user.firstName,  
+                lastName: user.lastName,     
                 email: user.email
             }
         });
@@ -192,6 +191,7 @@ router.post('/login', async (req, res) => {
         res.status(500).json({ message: 'Server error during login' });
     }
 });
+
 
 // Get current user profile
 router.get('/profile', authenticateToken, async (req, res) => {
@@ -250,14 +250,15 @@ router.put('/onboarding', authenticateToken, async (req, res) => {
 
 router.put('/profile', authenticateToken, async (req, res) => {
     try {
-        const { username, email, weight, height, age, gender, isPregnant,
+        const { firstName, lastName, email, weight, height, age, gender, isPregnant,  
             stressLevel, allergies, drugs, alcohol, comfortableWithPills } = req.body;
         const updates = {};
 
-        if (username) updates.username = username;
+        if (firstName) updates.firstName = firstName;  
+        if (lastName) updates.lastName = lastName;     
         if (email) updates.email = email;
-        if (weight !== undefined) updates.weight = weight; // FIXED
-        if (height !== undefined) updates.height = height; // FIXED
+        if (weight !== undefined) updates.weight = weight;
+        if (height !== undefined) updates.height = height;
         if (age !== undefined) updates.age = age;
         if (gender) updates.gender = gender;
         if (isPregnant !== undefined) updates.isPregnant = isPregnant;

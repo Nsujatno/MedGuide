@@ -21,7 +21,8 @@ export default function Settings() {
   const [isSaving, setIsSaving] = useState(false);
   
   const [formData, setFormData] = useState({
-    username: '',
+    firstName: '',  
+    lastName: '',   
     email: '',
     height: '',
     weight: '',
@@ -63,7 +64,8 @@ export default function Settings() {
       if (response.ok) {
         const user = data.user;
         setFormData({
-          username: user.username || '',
+          firstName: user.firstName || '',  
+          lastName: user.lastName || '',     
           email: user.email || '',
           height: user.height?.toString() || '',
           weight: user.weight?.toString() || '',
@@ -106,7 +108,8 @@ export default function Settings() {
       }
 
       const payload = {
-        username: formData.username,
+        firstName: formData.firstName,  // CHANGED
+        lastName: formData.lastName,    // ADDED
         email: formData.email,
         weight: formData.weight ? parseFloat(formData.weight) : undefined,
         height: formData.height ? parseFloat(formData.height) : undefined,
@@ -240,13 +243,23 @@ export default function Settings() {
         <View style={styles.card}>
           <SectionHeader title="Account Information" icon="person" />
           
-          <Text style={styles.label}>Username</Text>
+          {/* CHANGED: Split into First Name and Last Name */}
+          <Text style={styles.label}>First Name</Text>
           <TextInput
             style={[styles.input, { marginBottom: 15 }]}
-            value={formData.username}
-            onChangeText={(t) => setFormData({...formData, username: t})}
-            placeholder="Username"
-            autoCapitalize="none"
+            value={formData.firstName}
+            onChangeText={(t) => setFormData({...formData, firstName: t})}
+            placeholder="First Name"
+            autoCapitalize="words"
+          />
+
+          <Text style={styles.label}>Last Name</Text>
+          <TextInput
+            style={[styles.input, { marginBottom: 15 }]}
+            value={formData.lastName}
+            onChangeText={(t) => setFormData({...formData, lastName: t})}
+            placeholder="Last Name"
+            autoCapitalize="words"
           />
 
           <Text style={styles.label}>Email Address</Text>

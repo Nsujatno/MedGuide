@@ -62,10 +62,10 @@ export default function SignUpScreen() {
     setIsLoading(true);
 
     try {
-      const username = `${formData.firstName}${formData.lastName}`.toLowerCase().replace(/\s/g, '');
 
       const payload = {
-        username: username,
+        firstName: formData.firstName, 
+        lastName: formData.lastName,    
         email: formData.email.toLowerCase().trim(),
         password: formData.password
       };

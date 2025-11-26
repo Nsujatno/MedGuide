@@ -66,11 +66,9 @@ export default function LoginScreen() {
           router.replace('/createpro');
         }
       } else {
-        console.error('Login failed:', data);
         Alert.alert('Login Failed', data.message || 'Invalid email or password.');
       }
     } catch (error) {
-      console.error('Login error:', error);
       Alert.alert('Error', 'Unable to connect to server. Please check your connection and try again.');
     } finally {
       setIsLoading(false);

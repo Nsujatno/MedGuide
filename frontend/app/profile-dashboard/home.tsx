@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal, TouchableWithoutFeedback, Image, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react'; 
+import { View, Text, TouchableOpacity, StyleSheet, Modal, TouchableWithoutFeedback, Image, ScrollView, ActivityIndicator } from 'react-native'; // ADDED: ActivityIndicator
+import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Calendar } from 'react-native-calendars';
+const API_BASE_URL = 'http://localhost:3000'; 
 
 export default function HomeScreen() {
   const [showMenu, setShowMenu] = useState(false);
@@ -13,7 +15,8 @@ export default function HomeScreen() {
     [`${new Date().toISOString().split('T')[0]}-1`]: false,
     [`${new Date().toISOString().split('T')[0]}-2`]: false,
   });
-  const userName = "Nathan";
+  const [userName, setUserName] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   const medications = [
     {
@@ -37,6 +40,42 @@ export default function HomeScreen() {
       color: '#FFA726'
     }
   ];
+
+  useEffect(() => {
+    loadUserData();
+  }, []);
+
+  const loadUserData = async () => {
+    try {
+      setIsLoading(true);
+      const token = await AsyncStorage.getItem('authToken');
+      
+      if (!token) {
+        router.replace('/login');
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/user/profile`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        const firstName = data.user.firstName || 'User';  // CHANGED
+        setUserName(firstName);
+      } else {
+        console.error('Failed to load user data:', data);
+      }
+    } catch (error) {
+      console.error('Error loading user data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const toggleMedicationStatus = (date, medId) => {
     const key = `${date}-${medId}`;
@@ -78,8 +117,9 @@ export default function HomeScreen() {
     return medications;
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setShowMenu(false);
+    await AsyncStorage.clear(); 
     router.replace('/login');
   };
 
@@ -87,6 +127,15 @@ export default function HomeScreen() {
     setShowMenu(false);
     router.push('/settings');
   };
+
+  if (isLoading) {
+    return (
+      <LinearGradient colors={['#ffffff', '#FFB3D1']} style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#FF6B9D" />
+        <Text style={{ marginTop: 10, color: '#666', fontSize: 16 }}>Loading...</Text>
+      </LinearGradient>
+    );
+  }
 
   return (
     <LinearGradient colors={['#ffffff', '#FFB3D1']} style={styles.container}>
