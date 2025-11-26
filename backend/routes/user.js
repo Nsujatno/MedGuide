@@ -41,7 +41,7 @@ const userSchema = new mongoose.Schema({
     isPregnant: {
         type: Boolean,
         default: false
-    }, // only if female
+    },
     stressLevel: {
         type: String,
         enum: ["low", "moderate", "high"],
@@ -51,7 +51,8 @@ const userSchema = new mongoose.Schema({
         type: String
     },
     drugs: {
-        type: Boolean, default: false
+        type: Boolean, 
+        default: false
     },
     alcohol: {
         type: Boolean,
@@ -129,6 +130,7 @@ router.post('/register', async (req, res) => {
         res.status(201).json({
             message: 'User registered successfully',
             token,
+            isOnboardingComplete: false,
             user: {
                 id: newUser._id,
                 username: newUser.username,
@@ -165,6 +167,9 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
+        // Check if onboarding is complete
+        const isOnboardingComplete = !!(user.weight && user.height && user.age);
+
         // Generate JWT token
         const token = jwt.sign(
             { id: user._id, username: user.username, email: user.email },
@@ -175,6 +180,7 @@ router.post('/login', async (req, res) => {
         res.status(200).json({
             message: 'Login successful',
             token,
+            isOnboardingComplete,
             user: {
                 id: user._id,
                 username: user.username,
@@ -203,7 +209,45 @@ router.get('/profile', authenticateToken, async (req, res) => {
     }
 });
 
-// Update user profile
+router.put('/onboarding', authenticateToken, async (req, res) => {
+    try {
+        const { 
+            weight, height, age, gender, isPregnant,
+            stressLevel, allergies, drugs, alcohol, comfortableWithPills 
+        } = req.body;
+
+        const updates = {};
+        if (weight !== undefined) updates.weight = weight;
+        if (height !== undefined) updates.height = height;
+        if (age !== undefined) updates.age = age;
+        if (gender !== undefined) updates.gender = gender;
+        if (isPregnant !== undefined) updates.isPregnant = isPregnant;
+        if (stressLevel !== undefined) updates.stressLevel = stressLevel;
+        if (allergies !== undefined) updates.allergies = allergies;
+        if (drugs !== undefined) updates.drugs = drugs;
+        if (alcohol !== undefined) updates.alcohol = alcohol;
+        if (comfortableWithPills !== undefined) updates.comfortableWithPills = comfortableWithPills;
+
+        const user = await User.findByIdAndUpdate(
+            req.user.id,
+            updates,
+            { new: true, runValidators: true }
+        ).select('-password');
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json({
+            message: 'Onboarding completed successfully',
+            user
+        });
+    } catch (error) {
+        console.error('Onboarding update error:', error);
+        res.status(500).json({ message: 'Server error during onboarding' });
+    }
+});
+
 router.put('/profile', authenticateToken, async (req, res) => {
     try {
         const { username, email, weight, height, age, gender, isPregnant,
@@ -212,13 +256,13 @@ router.put('/profile', authenticateToken, async (req, res) => {
 
         if (username) updates.username = username;
         if (email) updates.email = email;
-        if (weight) updates.username = username;
-        if (height) updates.email = email;
-        if (age) updates.age = age;
+        if (weight !== undefined) updates.weight = weight; // FIXED
+        if (height !== undefined) updates.height = height; // FIXED
+        if (age !== undefined) updates.age = age;
         if (gender) updates.gender = gender;
         if (isPregnant !== undefined) updates.isPregnant = isPregnant;
         if (stressLevel) updates.stressLevel = stressLevel;
-        if (allergies) updates.allergies = allergies;
+        if (allergies !== undefined) updates.allergies = allergies;
         if (drugs !== undefined) updates.drugs = drugs;
         if (alcohol !== undefined) updates.alcohol = alcohol;
         if (comfortableWithPills !== undefined) updates.comfortableWithPills = comfortableWithPills;

@@ -10,10 +10,14 @@ import {
   KeyboardAvoidingView,
   Platform,
   Dimensions,
-  Alert
+  Alert,
+  ActivityIndicator
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+
+const API_BASE_URL = 'http://localhost:3000';
 
 const { height } = Dimensions.get('window');
 
@@ -27,22 +31,85 @@ export default function SignUpScreen() {
     confirmPassword: '',
     allowNotifs: false
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const updateField = (key: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [key]: value }));
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
+    // Validation
     if (!formData.email || !formData.password || !formData.firstName) {
       Alert.alert("Missing Fields", "Please fill in all required fields.");
       return;
     }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      Alert.alert("Invalid Email", "Please enter a valid email address.");
+      return;
+    }
+    
     if (formData.password !== formData.confirmPassword) {
       Alert.alert("Error", "Passwords do not match.");
       return;
     }
-    console.log("Registering User:", formData);
-    router.push('/success');
+    if (formData.password.length < 6) {
+      Alert.alert("Error", "Password must be at least 6 characters.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const username = `${formData.firstName}${formData.lastName}`.toLowerCase().replace(/\s/g, '');
+
+      const payload = {
+        username: username,
+        email: formData.email.toLowerCase().trim(),
+        password: formData.password
+      };
+
+      console.log('Registering user:', payload);
+
+      const response = await fetch(`${API_BASE_URL}/api/user/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log('Registration successful:', data);
+
+        await AsyncStorage.setItem('authToken', data.token);
+        await AsyncStorage.setItem('userData', JSON.stringify(data.user));
+
+        Alert.alert(
+          'Success!', 
+          'Your account has been created successfully.',
+          [
+            {
+              text: 'Continue',
+              onPress: () => {
+                router.replace('/login');
+              }
+            }
+          ]
+        );
+      } else {
+        console.error('Registration failed:', data);
+        Alert.alert('Registration Failed', data.message || 'Something went wrong. Please try again.');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      Alert.alert('Error', 'Unable to connect to server. Please check your connection and try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -77,6 +144,7 @@ export default function SignUpScreen() {
                 placeholderTextColor="#A0A0A0"
                 value={formData.firstName}
                 onChangeText={(t) => updateField('firstName', t)}
+                editable={!isLoading}
               />
             </View>
 
@@ -88,6 +156,7 @@ export default function SignUpScreen() {
                 placeholderTextColor="#A0A0A0"
                 value={formData.lastName}
                 onChangeText={(t) => updateField('lastName', t)}
+                editable={!isLoading}
               />
             </View>
 
@@ -101,6 +170,7 @@ export default function SignUpScreen() {
                 autoCapitalize="none"
                 value={formData.email}
                 onChangeText={(t) => updateField('email', t)}
+                editable={!isLoading}
               />
             </View>
 
@@ -108,11 +178,12 @@ export default function SignUpScreen() {
               <Ionicons name="call-outline" size={18} color="#999" style={styles.inputIcon} />
               <TextInput 
                 style={styles.input} 
-                placeholder="Phone Number" 
+                placeholder="Phone Number (Optional)" 
                 placeholderTextColor="#A0A0A0"
                 keyboardType="phone-pad"
                 value={formData.phone}
                 onChangeText={(t) => updateField('phone', t)}
+                editable={!isLoading}
               />
             </View>
 
@@ -125,6 +196,7 @@ export default function SignUpScreen() {
                 secureTextEntry
                 value={formData.password}
                 onChangeText={(t) => updateField('password', t)}
+                editable={!isLoading}
               />
             </View>
 
@@ -137,6 +209,7 @@ export default function SignUpScreen() {
                 secureTextEntry
                 value={formData.confirmPassword}
                 onChangeText={(t) => updateField('confirmPassword', t)}
+                editable={!isLoading}
               />
             </View>
           </View>
@@ -147,18 +220,27 @@ export default function SignUpScreen() {
               thumbColor="#FFFFFF"
               onValueChange={(v) => updateField('allowNotifs', v)}
               value={formData.allowNotifs}
-              style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }} 
+              style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
+              disabled={isLoading}
             />
             <Text style={styles.switchText}>Allow Notifications</Text>
           </View>
 
-          <TouchableOpacity style={styles.registerBtn} onPress={handleRegister}>
-            <Text style={styles.registerText}>Register</Text>
+          <TouchableOpacity 
+            style={[styles.registerBtn, isLoading && styles.registerBtnDisabled]} 
+            onPress={handleRegister}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator color="#1A1A1A" />
+            ) : (
+              <Text style={styles.registerText}>Register</Text>
+            )}
           </TouchableOpacity>
 
           <View style={styles.footerRow}>
             <Text style={styles.footerText}>Have an account? </Text>
-            <TouchableOpacity onPress={() => router.back()}>
+            <TouchableOpacity onPress={() => router.back()} disabled={isLoading}>
               <Text style={styles.linkText}>Log in</Text>
             </TouchableOpacity>
           </View>
@@ -280,6 +362,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 4,
+  },
+  registerBtnDisabled: {
+    opacity: 0.7,
   },
   registerText: {
     fontSize: 16,
