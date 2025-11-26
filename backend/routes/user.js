@@ -39,8 +39,7 @@ const userSchema = new mongoose.Schema({
     },
     gender: {
         type: String,
-        required: false,
-        enum: ["male", "female", "other"]
+        required: false
     },
     isPregnant: {
         type: Boolean,
