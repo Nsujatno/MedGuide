@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'; 
-import { View, Text, TouchableOpacity, StyleSheet, Modal, TouchableWithoutFeedback, Image, ScrollView, ActivityIndicator } from 'react-native'; // ADDED: ActivityIndicator
+import { View, Text, TouchableOpacity, StyleSheet, Modal, TouchableWithoutFeedback, Image, ScrollView, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,7 +9,7 @@ const API_BASE_URL = 'http://localhost:3000';
 
 export default function HomeScreen() {
   const [showMenu, setShowMenu] = useState(false);
-  const [hasTakenSurvey, setHasTakenSurvey] = useState(true);
+  const [hasTakenSurvey, setHasTakenSurvey] = useState(false); // CHANGED: Default to false
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [medicationStatus, setMedicationStatus] = useState({
     [`${new Date().toISOString().split('T')[0]}-1`]: false,
@@ -43,6 +43,7 @@ export default function HomeScreen() {
 
   useEffect(() => {
     loadUserData();
+    checkSurveyStatus(); 
   }, []);
 
   const loadUserData = async () => {
@@ -65,7 +66,7 @@ export default function HomeScreen() {
       const data = await response.json();
 
       if (response.ok) {
-        const firstName = data.user.firstName || 'User';  // CHANGED
+        const firstName = data.user.firstName || 'User';
         setUserName(firstName);
       } else {
         console.error('Failed to load user data:', data);
@@ -74,6 +75,35 @@ export default function HomeScreen() {
       console.error('Error loading user data:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const checkSurveyStatus = async () => {
+    try {
+      const token = await AsyncStorage.getItem('authToken');
+      
+      if (!token) {
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/survey/`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setHasTakenSurvey(data.length > 0);
+      } else {
+        console.error('Failed to check survey status:', data);
+        setHasTakenSurvey(false);
+      }
+    } catch (error) {
+      console.error('Error checking survey status:', error);
+      setHasTakenSurvey(false);
     }
   };
 
