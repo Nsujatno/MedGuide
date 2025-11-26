@@ -7,16 +7,72 @@ import {
   StyleSheet, 
   Image, 
   KeyboardAvoidingView, 
-  Platform 
+  Platform,
+  Alert,
+  ActivityIndicator
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
+
+const API_BASE_URL = 'http://localhost:3000';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = () => {
-    router.replace('/createpro');
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Missing Fields", "Please enter both email and password.");
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert("Invalid Email", "Please enter a valid email address.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const payload = {
+        email: email.toLowerCase().trim(),
+        password: password
+      };
+
+      console.log('Logging in:', { email: payload.email });
+
+      const response = await fetch(`${API_BASE_URL}/api/user/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log('Login successful:', data);
+
+        await AsyncStorage.setItem('authToken', data.token);
+        await AsyncStorage.setItem('userData', JSON.stringify(data.user));
+
+        if (data.isOnboardingComplete) {
+          router.replace('/profile-dashboard/home');
+        } else {
+          router.replace('/createpro');
+        }
+      } else {
+        Alert.alert('Login Failed', data.message || 'Invalid email or password.');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Unable to connect to server. Please check your connection and try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -52,6 +108,7 @@ export default function LoginScreen() {
               placeholderTextColor="#A0A0A0"
               keyboardType="email-address"
               autoCapitalize="none"
+              editable={!isLoading}
             />
           </View>
 
@@ -64,20 +121,33 @@ export default function LoginScreen() {
               secureTextEntry
               placeholder="••••••••"
               placeholderTextColor="#A0A0A0"
+              editable={!isLoading}
             />
           </View>
 
-          <TouchableOpacity style={styles.forgotBtn} onPress={() => router.push('/forgot-password')}>
+          <TouchableOpacity 
+            style={styles.forgotBtn} 
+            onPress={() => router.push('/forgot-password')}
+            disabled={isLoading}
+          >
             <Text style={styles.forgotText}>Forgot Password?</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.signInBtn} onPress={handleLogin}>
-            <Text style={styles.signInText}>Sign In</Text>
+          <TouchableOpacity 
+            style={[styles.signInBtn, isLoading && styles.signInBtnDisabled]} 
+            onPress={handleLogin}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator color="#1A1A1A" />
+            ) : (
+              <Text style={styles.signInText}>Sign In</Text>
+            )}
           </TouchableOpacity>
 
           <View style={styles.footerRow}>
             <Text style={styles.footerText}>Don't have an Account? </Text>
-            <TouchableOpacity onPress={() => router.push('/signUp')}>
+            <TouchableOpacity onPress={() => router.push('/signUp')} disabled={isLoading}>
               <Text style={styles.linkText}>Create Account</Text>
             </TouchableOpacity>
           </View>
@@ -140,7 +210,6 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     paddingVertical: 32,
     paddingHorizontal: 24,
-    
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.08,
@@ -195,6 +264,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 10,
     elevation: 6,
+  },
+  signInBtnDisabled: {
+    opacity: 0.7,
   },
   signInText: {
     fontSize: 16,

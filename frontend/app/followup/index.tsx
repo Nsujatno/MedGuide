@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, StyleSheet, Alert, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+const API_BASE_URL = 'http://localhost:3000'; 
 
 export default function FollowUpSurvey() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -120,7 +122,7 @@ export default function FollowUpSurvey() {
     }
   };
 
-  const handleNext = async () => {
+    const handleNext = async () => {
     if (currentStep < 5 && !validateCurrentStep()) {
       return;
     }
@@ -131,11 +133,20 @@ export default function FollowUpSurvey() {
       console.log('Submitting follow-up:', answers);
       
       try {
-        const baseUrl = 'http://localhost:3000'; 
+        const token = await AsyncStorage.getItem('authToken');
         
-        const response = await fetch(`${baseUrl}/api/followup/create`, {
+        if (!token) {
+          Alert.alert('Error', 'Please login again.');
+          router.replace('/login');
+          return;
+        }
+        
+        const response = await fetch(`${API_BASE_URL}/api/followup/create`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+          },
           body: JSON.stringify(answers),
         });
 

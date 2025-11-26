@@ -14,10 +14,12 @@ import {
   ActivityIndicator,
   Alert
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
+const API_BASE_URL = 'http://localhost:3000';
 if (Platform.OS === 'ios' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
@@ -42,6 +44,7 @@ export default function ProfileSetupScreen() {
   const [formData, setFormData] = useState({
     height: '',
     weight: '',
+    age: '', // ADDED
     sex: '', 
     sexOther: '',
     isPregnant: null, 
@@ -61,8 +64,8 @@ export default function ProfileSetupScreen() {
   const validateStep = (currentStep: number) => {
     switch (currentStep) {
       case 1: 
-        if (!formData.height || !formData.weight) {
-          Alert.alert("Required", "Please enter your height and weight.");
+        if (!formData.height || !formData.weight || !formData.age) { // UPDATED
+          Alert.alert("Required", "Please enter your height, weight, and age.");
           return false;
         }
         return true;
@@ -109,17 +112,74 @@ export default function ProfileSetupScreen() {
     }
   };
 
+  const getStressLevelEnum = (level: number): string => {
+    if (level <= 3) return 'low';
+    if (level <= 7) return 'moderate';
+    return 'high';
+  };
+
+  const submitOnboarding = async () => {
+    try {
+      setIsSubmitting(true);
+
+      const token = await AsyncStorage.getItem('authToken');
+      
+      if (!token) {
+        Alert.alert('Error', 'No authentication token found. Please login again.');
+        router.replace('/login');
+        return;
+      }
+
+      const payload = {
+        weight: parseFloat(formData.weight),
+        height: parseFloat(formData.height),
+        age: parseInt(formData.age),
+        gender: formData.sex === 'other' ? formData.sexOther : formData.sex,
+        isPregnant: formData.sex === 'female' ? formData.isPregnant : false,
+        stressLevel: getStressLevelEnum(formData.stressLevel),
+        allergies: formData.allergies || '',
+        drugs: formData.consumesDrugs,
+        alcohol: formData.consumesAlcohol,
+        comfortableWithPills: formData.comfortableWithPills
+      };
+
+      console.log('Submitting onboarding data:', payload);
+
+      const response = await fetch(`${API_BASE_URL}/api/user/onboarding`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log('Onboarding successful:', data);
+        await AsyncStorage.setItem('userData', JSON.stringify(data.user));
+        
+        setTimeout(() => {
+          router.replace('/profile-dashboard/home');
+        }, 500);
+      } else {
+        console.error('Onboarding failed:', data);
+        Alert.alert('Error', data.message || 'Failed to save profile. Please try again.');
+        setIsSubmitting(false);
+      }
+    } catch (error) {
+      console.error('Onboarding error:', error);
+      Alert.alert('Error', 'Something went wrong. Please check your connection and try again.');
+      setIsSubmitting(false);
+    }
+  };
+
   const handleNext = () => {
     if (!validateStep(step)) return;
 
     if (step === 5) {
-      setIsSubmitting(true);
-      
-      console.log("FINAL SUBMISSION DATA:", formData); 
-
-      setTimeout(() => {
-        router.replace('/profile-dashboard/home'); 
-      }, 800); 
+      submitOnboarding();
     } else {
       LayoutAnimation.configureNext(CustomLayoutSpring);
       setStep(step + 1);
@@ -130,7 +190,6 @@ export default function ProfileSetupScreen() {
     LayoutAnimation.configureNext(CustomLayoutSpring);
     if (step > 1) setStep(step - 1);
   };
-
 
   const ProgressBar = ({ progress }: { progress: number }) => (
     <View style={styles.progressContainer}>
@@ -156,7 +215,6 @@ export default function ProfileSetupScreen() {
       <Text style={[styles.radioText, active && styles.radioTextActive]}>{label}</Text>
     </TouchableOpacity>
   );
-
 
   const renderStep0_Welcome = () => (
     <LinearGradient colors={['#FFB3D1', '#FFE4F0']} style={styles.fullScreenContainer}>
@@ -218,6 +276,22 @@ export default function ProfileSetupScreen() {
           />
           <View style={styles.unitBadge}><Text style={styles.unitText}>lbs</Text></View>
         </View>
+
+        <View style={styles.spacerLarge} />
+
+        <Text style={styles.questionLabel}>Age?</Text>
+        <View style={styles.inputRow}>
+          <TextInput 
+            style={styles.fixedWidthInput} 
+            keyboardType="numeric"
+            placeholder="0"
+            placeholderTextColor="#CCC"
+            value={formData.age}
+            onChangeText={(t) => updateField('age', t)}
+            textAlign="center" 
+          />
+          <View style={styles.unitBadge}><Text style={styles.unitText}>years</Text></View>
+        </View>
       </View>
     </View>
   );
@@ -238,7 +312,6 @@ export default function ProfileSetupScreen() {
               label={opt} 
               selected={formData.sex === opt.toLowerCase()} 
               onPress={() => {
-                // If switching away from 'other', clear the custom text
                 if (opt.toLowerCase() !== 'other') {
                    setFormData(prev => ({ ...prev, sex: opt.toLowerCase(), sexOther: '' }));
                 } else {
@@ -294,7 +367,6 @@ export default function ProfileSetupScreen() {
       </View>
     </View>
   );
-
 
   const renderStep3_Stress = () => {
     const getStressColor = (level: number) => {
@@ -424,7 +496,6 @@ export default function ProfileSetupScreen() {
              <RadioOption label="No" active={formData.comfortableWithPills === false} onPress={() => updateField('comfortableWithPills', false)} />
           </View>
         </View>
-
       </View>
     </ScrollView>
   );
@@ -459,7 +530,6 @@ export default function ProfileSetupScreen() {
     </View>
   );
 
-  // --- MAIN RENDER ---
   if (step === 0) return renderStep0_Welcome();
 
   return (
@@ -727,7 +797,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#1A1A1A',
-    flex: 1, // Allows text to wrap nicely if needed
+    flex: 1,
   },
   questionRow: {
     flexDirection: 'row',
@@ -795,9 +865,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 22,
     fontWeight: '800',
-   
   },
-
   sectionHeader: {
     fontSize: 18,
     fontWeight: '700',
@@ -826,7 +894,6 @@ const styles = StyleSheet.create({
     height: 120,
     textAlignVertical: 'top',
   },
-
   centerContent: {
     flex: 1,
     paddingHorizontal: 32,
@@ -872,7 +939,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#1A1A1A',
   },
-
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -905,5 +971,4 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 16,
   },
-
 });

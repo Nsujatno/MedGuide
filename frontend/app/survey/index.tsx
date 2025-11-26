@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, StyleSheet, Alert, Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import Slider from '@react-native-community/slider';
 import DateTimePicker from '@react-native-community/datetimepicker';
+const API_BASE_URL = 'http://localhost:3000'; // ADDED
 
 export default function Survey() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -117,7 +119,6 @@ export default function Survey() {
         }
         return true;
       case 1:
-        // Date is guaranteed valid by Date object, check location
         if (!answers.symptomsLocation.trim()) {
           Alert.alert('Required', 'Please enter where you feel these symptoms.');
           return false;
@@ -160,9 +161,20 @@ export default function Survey() {
     } else {
       console.log('Submitting survey:', answers);
       try {
-        const response = await fetch('http://localhost:3000/api/survey/create', { 
+        const token = await AsyncStorage.getItem('authToken');
+        
+        if (!token) {
+          Alert.alert('Error', 'Please login again.');
+          router.replace('/login');
+          return;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/survey/create`, { 
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+          },
           body: JSON.stringify(answers),
         });
 
