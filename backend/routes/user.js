@@ -284,14 +284,25 @@ router.put('/profile', authenticateToken, async (req, res) => {
     }
 });
 
-// Delete user account
+// DELETE account and all related data
 router.delete('/account', authenticateToken, async (req, res) => {
     try {
-        await User.findByIdAndDelete(req.user.id);
-        res.status(200).json({ message: 'Account deleted successfully' });
+        const userId = req.user.id;
+
+        await mongoose.model('Survey').deleteMany({ userId: userId });
+        await mongoose.model('Followup').deleteMany({ userId: userId });
+        const user = await User.findByIdAndDelete(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json({ 
+            message: 'Account and all associated data deleted successfully' 
+        });
     } catch (error) {
-        console.error('Account deletion error:', error);
-        res.status(500).json({ message: 'Server error' });
+        console.error('Delete account error:', error);
+        res.status(500).json({ message: 'Server error during account deletion' });
     }
 });
 
