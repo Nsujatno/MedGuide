@@ -6,39 +6,146 @@ import {
   TouchableOpacity, 
   StyleSheet, 
   ScrollView, 
-  Alert 
+  Alert,
+  ActivityIndicator
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
+const API_BASE_URL = 'http://localhost:3000';
+
 export default function Settings() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  
   const [formData, setFormData] = useState({
-    fullName: '',
+    username: '',
     email: '',
-    
     height: '',
     weight: '',
+    age: '',
     sex: 'female',
     sexOther: '',
     isPregnant: false,
-    
     stressLevel: 5,
     allergies: '',
-    
-    pharmacy1: '',
-    pharmacy2: '',
     consumesDrugs: false,
     consumesAlcohol: false,
     comfortableWithPills: true,
   });
 
+  useEffect(() => {
+    loadUserData();
+  }, []);
+
+  const loadUserData = async () => {
+    try {
+      setIsLoading(true);
+      const token = await AsyncStorage.getItem('authToken');
+      
+      if (!token) {
+        Alert.alert('Error', 'Please login again.');
+        router.replace('/login');
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/user/profile`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        const user = data.user;
+        setFormData({
+          username: user.username || '',
+          email: user.email || '',
+          height: user.height?.toString() || '',
+          weight: user.weight?.toString() || '',
+          age: user.age?.toString() || '',
+          sex: user.gender || 'female',
+          sexOther: (user.gender && !['male', 'female'].includes(user.gender)) ? user.gender : '',
+          isPregnant: user.isPregnant || false,
+          stressLevel: user.stressLevel === 'low' ? 3 : user.stressLevel === 'moderate' ? 5 : 8,
+          allergies: user.allergies || '',
+          consumesDrugs: user.drugs || false,
+          consumesAlcohol: user.alcohol || false,
+          comfortableWithPills: user.comfortableWithPills !== undefined ? user.comfortableWithPills : true,
+        });
+      } else {
+        Alert.alert('Error', 'Failed to load profile data.');
+      }
+    } catch (error) {
+      console.error('Load profile error:', error);
+      Alert.alert('Error', 'Unable to load profile data.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getStressLevelEnum = (level: number): string => {
+    if (level <= 3) return 'low';
+    if (level <= 7) return 'moderate';
+    return 'high';
+  };
+
   const handleSave = async () => {
     try {
-      Alert.alert("Success", "Settings updated successfully!");
-      router.back();
+      setIsSaving(true);
+      const token = await AsyncStorage.getItem('authToken');
+
+      if (!token) {
+        Alert.alert('Error', 'Please login again.');
+        router.replace('/login');
+        return;
+      }
+
+      const payload = {
+        username: formData.username,
+        email: formData.email,
+        weight: formData.weight ? parseFloat(formData.weight) : undefined,
+        height: formData.height ? parseFloat(formData.height) : undefined,
+        age: formData.age ? parseInt(formData.age) : undefined,
+        gender: formData.sex === 'other' ? formData.sexOther : formData.sex,
+        isPregnant: formData.sex === 'female' ? formData.isPregnant : false,
+        stressLevel: getStressLevelEnum(formData.stressLevel),
+        allergies: formData.allergies,
+        drugs: formData.consumesDrugs,
+        alcohol: formData.consumesAlcohol,
+        comfortableWithPills: formData.comfortableWithPills
+      };
+
+      console.log('Updating profile:', payload);
+
+      const response = await fetch(`${API_BASE_URL}/api/user/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log('Profile updated:', data);
+        await AsyncStorage.setItem('userData', JSON.stringify(data.user));
+        Alert.alert("Success", "Settings updated successfully!");
+        router.back();
+      } else {
+        Alert.alert('Error', data.message || 'Failed to update settings.');
+      }
     } catch (error) {
+      console.error('Update error:', error);
       Alert.alert("Error", "Failed to update settings");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -52,7 +159,32 @@ export default function Settings() {
       "Are you sure? This action cannot be undone.",
       [
         { text: "Cancel", style: "cancel" },
-        { text: "Delete", style: "destructive", onPress: () => router.replace('/') }
+        { 
+          text: "Delete", 
+          style: "destructive", 
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem('authToken');
+              
+              const response = await fetch(`${API_BASE_URL}/api/user/account`, {
+                method: 'DELETE',
+                headers: {
+                  'Authorization': `Bearer ${token}`
+                }
+              });
+
+              if (response.ok) {
+                await AsyncStorage.clear();
+                router.replace('/');
+              } else {
+                Alert.alert('Error', 'Failed to delete account.');
+              }
+            } catch (error) {
+              console.error('Delete account error:', error);
+              Alert.alert('Error', 'Failed to delete account.');
+            }
+          }
+        }
       ]
     );
   };
@@ -84,6 +216,15 @@ export default function Settings() {
     </View>
   );
 
+  if (isLoading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#FF6B9D" />
+        <Text style={{ marginTop: 10, color: '#666' }}>Loading profile...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -99,13 +240,13 @@ export default function Settings() {
         <View style={styles.card}>
           <SectionHeader title="Account Information" icon="person" />
           
-          <Text style={styles.label}>Full Name</Text>
+          <Text style={styles.label}>Username</Text>
           <TextInput
             style={[styles.input, { marginBottom: 15 }]}
-            value={formData.fullName}
-            onChangeText={(t) => setFormData({...formData, fullName: t})}
-            placeholder="Nathan S"
-            autoCapitalize="words"
+            value={formData.username}
+            onChangeText={(t) => setFormData({...formData, username: t})}
+            placeholder="Username"
+            autoCapitalize="none"
           />
 
           <Text style={styles.label}>Email Address</Text>
@@ -113,7 +254,7 @@ export default function Settings() {
             style={[styles.input, { marginBottom: 15 }]}
             value={formData.email}
             onChangeText={(t) => setFormData({...formData, email: t})}
-            placeholder="nathan@example.com"
+            placeholder="email@example.com"
             keyboardType="email-address"
             autoCapitalize="none"
           />
@@ -149,6 +290,15 @@ export default function Settings() {
             </View>
           </View>
 
+          <Text style={styles.label}>Age</Text>
+          <TextInput
+            style={[styles.input, { marginBottom: 15 }]}
+            value={formData.age}
+            onChangeText={(t) => setFormData({...formData, age: t})}
+            keyboardType="numeric"
+            placeholder="25"
+          />
+
           <Text style={styles.label}>Sex</Text>
           <View style={styles.segmentContainer}>
             {['Female', 'Male', 'Other'].map((option) => (
@@ -173,7 +323,7 @@ export default function Settings() {
               style={[styles.input, { marginTop: 10 }]}
               value={formData.sexOther}
               onChangeText={(t) => setFormData({...formData, sexOther: t})}
-              placeholder="Type here..."
+              placeholder="Please specify..."
             />
           )}
 
@@ -221,20 +371,6 @@ export default function Settings() {
 
         <View style={styles.card}>
           <SectionHeader title="Preferences" icon="list" />
-          
-          <Text style={styles.label}>Preferred Pharmacies</Text>
-          <TextInput
-            style={[styles.input, { marginBottom: 10 }]}
-            value={formData.pharmacy1}
-            onChangeText={(t) => setFormData({...formData, pharmacy1: t})}
-            placeholder="Address #1"
-          />
-          <TextInput
-            style={[styles.input, { marginBottom: 15 }]}
-            value={formData.pharmacy2}
-            onChangeText={(t) => setFormData({...formData, pharmacy2: t})}
-            placeholder="Address #2"
-          />
 
           <ToggleOption 
             label="Do you consume drugs?" 
@@ -270,8 +406,16 @@ export default function Settings() {
         colors={['rgba(255,255,255,0)', 'rgba(255,255,255,1)']}
         style={styles.footer}
       >
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>Save Changes</Text>
+        <TouchableOpacity 
+          style={[styles.saveButton, isSaving && styles.saveButtonDisabled]} 
+          onPress={handleSave}
+          disabled={isSaving}
+        >
+          {isSaving ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.saveButtonText}>Save Changes</Text>
+          )}
         </TouchableOpacity>
       </LinearGradient>
     </View>
@@ -457,6 +601,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 5,
+  },
+  saveButtonDisabled: {
+    opacity: 0.7,
   },
   saveButtonText: {
     color: '#fff',
